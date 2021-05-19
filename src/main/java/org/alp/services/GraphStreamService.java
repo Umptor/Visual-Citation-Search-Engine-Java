@@ -1,11 +1,14 @@
 package org.alp.services;
 
+import org.alp.models.Paper;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 
+import java.util.ArrayList;
+
 public class GraphStreamService {
-	private Graph graph = new SingleGraph("Citation Graph");
+	private final Graph graph = new SingleGraph("Citation Graph");
 	private Node root = null;
 
 	public GraphStreamService() {
@@ -13,17 +16,28 @@ public class GraphStreamService {
 		this.setStyleSheet();
 	}
 
-	public void addNode(String id, String[] edges) {
-		var node = graph.addNode(id);
-		if(root == null) this.setRoot(node);
+	public void addNode(Paper paper, ArrayList<Paper> edges) {
+		var node = this.addNode(paper);
 
-		for(String edge : edges) {
-			var secondNode = graph.nodes().filter(nodeForEach ->  nodeForEach.getId().equals(edge)).findFirst().orElse(null);
+		for(Paper edge : edges) {
+			var secondNode = graph.nodes()
+					.filter((Node nodeForEach) -> nodeForEach.getId().equals(node.getId()))
+					.findFirst().orElse(null);
+
 			if(secondNode == null) {
-				secondNode = graph.addNode(edge);
+				secondNode = this.addNode(edge);
 			}
 			graph.addEdge(getEdgeId(node, secondNode), node, secondNode);
 		}
+	}
+
+
+	private Node addNode(Paper paper) {
+		Node node = graph.addNode(paper.getDoi());
+		if(root == null) this.setRoot(node);
+		node.setAttribute("ui.label", "" + paper.getTitle());
+
+		return node;
 	}
 
 	public void showGraph() {

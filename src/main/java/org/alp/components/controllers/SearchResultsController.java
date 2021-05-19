@@ -7,19 +7,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import org.alp.models.Paper;
-import org.alp.models.crossrefApi.getWorksResponse.Item;
-import org.alp.models.crossrefApi.getWorksResponse.Reference;
 import org.alp.services.GraphStreamService;
-import org.alp.services.SearchResultsService;
+import org.alp.services.PaperService;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Objects;
 
 
 public class SearchResultsController {
@@ -30,23 +23,23 @@ public class SearchResultsController {
 	public TableView<PaperTableElement> resultsTable;
 
 	PaperTableElement selectedPaper;
-	Item[] papers;
+	ArrayList<Paper> papers;
 
 	public SearchResultsController() {
 		System.out.println("controller for searchResults");
-		papers = SearchResultsService.getGetWorksResponse().getMessage().getItems();
+		papers = PaperService.getPapers();
 	}
 
 	@FXML
 	public void initialize() {
 		this.initializeTable();
 
-		Arrays.asList(papers).forEach(paper -> {
+		papers.forEach(paper -> {
 			String title = "no title";
 			String author = "no author";
 
 			if(paper.getTitle() != null) {
-				title = paper.getTitle()[0];
+				title = paper.getTitle();
 			}
 			if(paper.getAuthors() != null) {
 				author = paper.getAuthors()[0].getFullname();
@@ -93,8 +86,8 @@ public class SearchResultsController {
 			return;
 		}
 		var graph = new GraphStreamService();
-		Item selected = null;
-		for(Item paper : papers) {
+		Paper selected = null;
+		for(Paper paper : papers) {
 			if(this.selectedPaper.getDoi() == null) {
 				System.out.println("Paper doesn't have DOI, what");
 				return;
@@ -105,15 +98,8 @@ public class SearchResultsController {
 			}
 		}
 
-		ArrayList<String> references = new ArrayList<>();
-		String[] referencesStringArr = new String[]{};
 		assert selected != null;
-		if(selected.getReferences() != null) {
-			Arrays.stream(selected.getReferences()).map(Reference::getDoi).filter(Objects::nonNull).forEach(references::add);
-			referencesStringArr = references.toArray(referencesStringArr);
-		}
-
-		graph.addNode(selected.getDoi(), references.isEmpty() ? new String[]{} : referencesStringArr);
+		graph.addNode(selected, selected.getReferences());
 
 		graph.showGraph();
 	}

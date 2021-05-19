@@ -7,7 +7,7 @@ import javafx.scene.control.TextField;
 import org.alp.App;
 import org.alp.models.crossrefApi.getWorksResponse.GetWorksResponse;
 import org.alp.services.CrossRefService;
-import org.alp.services.SearchResultsService;
+import org.alp.services.PaperService;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
@@ -57,9 +57,7 @@ public class HomepageController {
 	}
 
 	public void searchButtonOnClick(ActionEvent actionEvent) throws InterruptedException, IOException, URISyntaxException {
-		var response = CrossRefService.getPaperByKeyWord(searchTextField.getText());
-		var responseObject = new Gson().fromJson(response, GetWorksResponse.class);
-		SearchResultsService.setGetWorksResponse(responseObject);
+		CrossRefService.getPaperByKeyWord(searchTextField.getText());
 
 		App.setRoot("searchResults");
 	}

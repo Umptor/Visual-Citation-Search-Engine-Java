@@ -1,48 +1,34 @@
 package org.alp.models;
 
+import org.alp.models.crossrefApi.getWorksResponse.Author;
+
+import java.util.ArrayList;
+
 public class Paper {
-	private String DOI;
-	private String[] ISSN;
-	private String URL;
+
+	private String doi;
+
 	private String title;
-	private String[] containerTitle;
-	private Author author;
-	private String[] subject;
-	private Reference reference;
 
-	public Paper(String DOI, String[] ISSN, String URL, String title, String[] containerTitle, Author author, String[] subject, Reference reference) {
-		this.DOI = DOI;
-		this.ISSN = ISSN;
-		this.URL = URL;
+	private Author[] authors;
+
+	private ArrayList<Paper> references;
+
+	public Paper(String doi, String title, Author[] authors, ArrayList<Paper> references) {
+		this.doi = doi;
 		this.title = title;
-		this.containerTitle = containerTitle;
-		this.author = author;
-		this.subject = subject;
-		this.reference = reference;
+		this.authors = authors;
+		this.references = references;
 	}
 
-	public String getDOI() {
-		return DOI;
+	public Paper() {}
+
+	public String getDoi() {
+		return doi;
 	}
 
-	public void setDOI(String DOI) {
-		this.DOI = DOI;
-	}
-
-	public String[] getISSN() {
-		return ISSN;
-	}
-
-	public void setISSN(String[] ISSN) {
-		this.ISSN = ISSN;
-	}
-
-	public String getURL() {
-		return URL;
-	}
-
-	public void setURL(String URL) {
-		this.URL = URL;
+	public void setDoi(String doi) {
+		this.doi = doi;
 	}
 
 	public String getTitle() {
@@ -53,35 +39,19 @@ public class Paper {
 		this.title = title;
 	}
 
-	public String[] getContainerTitle() {
-		return containerTitle;
+	public Author[] getAuthors() {
+		return authors;
 	}
 
-	public void setContainerTitle(String[] containerTitle) {
-		this.containerTitle = containerTitle;
+	public void setAuthors(Author[] authors) {
+		this.authors = authors;
 	}
 
-	public Author getAuthor() {
-		return author;
+	public ArrayList<Paper> getReferences() {
+		return references;
 	}
 
-	public void setAuthor(Author author) {
-		this.author = author;
-	}
-
-	public String[] getSubject() {
-		return subject;
-	}
-
-	public void setSubject(String[] subject) {
-		this.subject = subject;
-	}
-
-	public Reference getReference() {
-		return reference;
-	}
-
-	public void setReference(Reference reference) {
-		this.reference = reference;
+	public void setReferences(ArrayList<Paper> references) {
+		this.references = references;
 	}
 }
