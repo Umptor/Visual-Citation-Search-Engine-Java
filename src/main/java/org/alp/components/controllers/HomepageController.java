@@ -2,14 +2,26 @@ package org.alp.components.controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import org.alp.App;
+import org.alp.models.crossrefApi.getWorksResponse.GetWorksResponse;
+import org.alp.services.CrossRefService;
+import org.alp.services.SearchResultsService;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.alp.services.CssReader;
+import com.google.gson.Gson;
 
-import java.net.http.HttpClient;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 
 public class HomepageController {
+
+	public TextField searchTextField;
+	public Button homepageSearchButton;
 
 	public HomepageController() {
 
@@ -44,10 +56,11 @@ public class HomepageController {
 		System.out.println("Initialized Homepage");
 	}
 
-	public void searchButtonOnClick(ActionEvent actionEvent) {
-		var httpClient = HttpClient.newHttpClient();
+	public void searchButtonOnClick(ActionEvent actionEvent) throws InterruptedException, IOException, URISyntaxException {
+		var response = CrossRefService.getPaperByKeyWord(searchTextField.getText());
+		var responseObject = new Gson().fromJson(response, GetWorksResponse.class);
+		SearchResultsService.setGetWorksResponse(responseObject);
 
-//		httpClient.send()
-
+		App.setRoot("searchResults");
 	}
 }
