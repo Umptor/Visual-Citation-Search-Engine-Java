@@ -4,13 +4,22 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import org.alp.models.Paper;
 import org.alp.models.crossrefApi.getWorksResponse.Item;
+import org.alp.models.crossrefApi.getWorksResponse.Reference;
+import org.alp.services.GraphStreamService;
 import org.alp.services.SearchResultsService;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Objects;
 
 
 public class SearchResultsController {
@@ -20,12 +29,12 @@ public class SearchResultsController {
 	@FXML
 	public TableView<PaperTableElement> resultsTable;
 
+	PaperTableElement selectedPaper;
 	Item[] papers;
 
 	public SearchResultsController() {
 		System.out.println("controller for searchResults");
 		papers = SearchResultsService.getGetWorksResponse().getMessage().getItems();
-
 	}
 
 	@FXML
@@ -42,7 +51,7 @@ public class SearchResultsController {
 			if(paper.getAuthors() != null) {
 				author = paper.getAuthors()[0].getFullname();
 			}
-			var a = new PaperTableElement(title, author);
+			var a = new PaperTableElement(title, author, paper.getDoi());
 			resultsTable.getItems().add(a);
 		});
 
@@ -53,6 +62,16 @@ public class SearchResultsController {
 		this.setTableColumns();
 
 		this.resultsTable.setItems(FXCollections.observableArrayList());
+		resultsTable.setRowFactory(tv -> {
+			TableRow<PaperTableElement> row = new TableRow<>();
+			row.setOnMouseClicked(event -> {
+				if (!row.isEmpty()) {
+
+					this.selectedPaper = row.getItem();
+				}
+			});
+			return row;
+		});
 	}
 
 	private void setTableColumns() {
@@ -69,5 +88,33 @@ public class SearchResultsController {
 
 	public void onShowButtonMouseClick(MouseEvent mouseEvent) {
 		System.out.println("clicked show button");
+		if(this.selectedPaper == null) {
+			System.out.println("No Paper selected");
+			return;
+		}
+		var graph = new GraphStreamService();
+		Item selected = null;
+		for(Item paper : papers) {
+			if(this.selectedPaper.getDoi() == null) {
+				System.out.println("Paper doesn't have DOI, what");
+				return;
+			}
+			if(paper.getDoi().equals(selectedPaper.getDoi())) {
+				selected = paper;
+				break;
+			}
+		}
+
+		ArrayList<String> references = new ArrayList<>();
+		String[] referencesStringArr = new String[]{};
+		assert selected != null;
+		if(selected.getReferences() != null) {
+			Arrays.stream(selected.getReferences()).map(Reference::getDoi).filter(Objects::nonNull).forEach(references::add);
+			referencesStringArr = references.toArray(referencesStringArr);
+		}
+
+		graph.addNode(selected.getDoi(), references.isEmpty() ? new String[]{} : referencesStringArr);
+
+		graph.showGraph();
 	}
 }
