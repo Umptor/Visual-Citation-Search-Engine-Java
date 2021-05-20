@@ -1,4 +1,4 @@
-package org.alp.models.crossrefApi.getWorksResponse;
+package org.alp.models.crossrefApi;
 
 public class Author {
 	private String given;

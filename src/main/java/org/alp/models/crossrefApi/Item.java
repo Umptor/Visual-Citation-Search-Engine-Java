@@ -1,4 +1,4 @@
-package org.alp.models.crossrefApi.getWorksResponse;
+package org.alp.models.crossrefApi;
 
 import com.google.gson.annotations.SerializedName;
 

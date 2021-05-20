@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import org.alp.App;
+import org.alp.models.Paper;
 import org.alp.models.crossrefApi.getWorksResponse.GetWorksResponse;
 import org.alp.services.CrossRefService;
 import org.alp.services.PaperService;
@@ -16,6 +17,7 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 
 public class HomepageController {
@@ -57,8 +59,8 @@ public class HomepageController {
 	}
 
 	public void searchButtonOnClick(ActionEvent actionEvent) throws InterruptedException, IOException, URISyntaxException {
-		CrossRefService.getPaperByKeyWord(searchTextField.getText());
-
+		ArrayList<Paper> papers = CrossRefService.getPaperByKeyWord(searchTextField.getText());
+		PaperService.setPapers(papers);
 		App.setRoot("searchResults");
 	}
 }

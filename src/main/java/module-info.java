@@ -12,6 +12,7 @@ module org.alp {
     opens org.alp.models to com.google.gson;
     opens org.alp.models.crossrefApi to com.google.gson;
     opens org.alp.models.crossrefApi.getWorksResponse to com.google.gson;
+    opens org.alp.models.crossrefApi.getMetaDataResponse to com.google.gson;
 
     exports org.alp;
 }

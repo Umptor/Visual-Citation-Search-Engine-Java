@@ -1,6 +1,7 @@
 package org.alp.services;
 
 import org.alp.models.Paper;
+import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
@@ -21,13 +22,17 @@ public class GraphStreamService {
 
 		for(Paper edge : edges) {
 			var secondNode = graph.nodes()
-					.filter((Node nodeForEach) -> nodeForEach.getId().equals(node.getId()))
+					.filter((Node nodeForEach) -> nodeForEach.getId().equals(edge.getDoi()))
 					.findFirst().orElse(null);
 
 			if(secondNode == null) {
 				secondNode = this.addNode(edge);
 			}
-			graph.addEdge(getEdgeId(node, secondNode), node, secondNode);
+
+			String newEdgeId = getEdgeId(node, secondNode);
+			if(graph.edges().noneMatch((Edge existingEdge) -> existingEdge.getId().equals(newEdgeId))) {
+				graph.addEdge(newEdgeId, node, secondNode);
+			}
 		}
 	}
 

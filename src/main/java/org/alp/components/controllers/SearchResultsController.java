@@ -9,9 +9,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import org.alp.models.Paper;
+import org.alp.services.CrossRefService;
 import org.alp.services.GraphStreamService;
 import org.alp.services.PaperService;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 
@@ -79,7 +82,7 @@ public class SearchResultsController {
 		resultsTable.getColumns().addAll(titleColumn, authorColumn);
 	}
 
-	public void onShowButtonMouseClick(MouseEvent mouseEvent) {
+	public void onShowButtonMouseClick(MouseEvent mouseEvent) throws InterruptedException, IOException, URISyntaxException {
 		System.out.println("clicked show button");
 		if(this.selectedPaper == null) {
 			System.out.println("No Paper selected");
@@ -97,8 +100,10 @@ public class SearchResultsController {
 				break;
 			}
 		}
-
 		assert selected != null;
+
+		selected.setReferences(CrossRefService.getRelatedPapers(selected, 2));
+
 		graph.addNode(selected, selected.getReferences());
 
 		graph.showGraph();

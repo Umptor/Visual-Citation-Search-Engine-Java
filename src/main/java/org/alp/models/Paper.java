@@ -1,6 +1,6 @@
 package org.alp.models;
 
-import org.alp.models.crossrefApi.getWorksResponse.Author;
+import org.alp.models.crossrefApi.Author;
 
 import java.util.ArrayList;
 

@@ -1,8 +1,9 @@
 package org.alp.models.crossrefApi.getWorksResponse;
 
 import com.google.gson.annotations.SerializedName;
+import org.alp.models.crossrefApi.Item;
 
-public class Message {
+public class GetWorksMessage {
 
 	@SerializedName("total-results")
 	private int totalResults;
@@ -12,7 +13,7 @@ public class Message {
 	@SerializedName("items-per-page")
 	private int itemsPerPage;
 
-	public Message(int totalResults, Item[] items, int itemsPerPage) {
+	public GetWorksMessage(int totalResults, Item[] items, int itemsPerPage) {
 		this.totalResults = totalResults;
 		this.items = items;
 		this.itemsPerPage = itemsPerPage;

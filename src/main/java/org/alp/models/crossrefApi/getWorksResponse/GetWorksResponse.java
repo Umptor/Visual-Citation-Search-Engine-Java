@@ -1,11 +1,10 @@
 package org.alp.models.crossrefApi.getWorksResponse;
 
-import com.google.gson.annotations.SerializedName;
 import org.alp.models.crossrefApi.DefaultCrossRefResponse;
 
-public class GetWorksResponse extends DefaultCrossRefResponse<Message> {
+public class GetWorksResponse extends DefaultCrossRefResponse<GetWorksMessage> {
 
-	public GetWorksResponse(String status, Message message) {
-		super(status, message);
+	public GetWorksResponse(String status, GetWorksMessage getWorksMessage) {
+		super(status, getWorksMessage);
 	}
 }
