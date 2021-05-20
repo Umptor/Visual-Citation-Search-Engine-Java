@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class CrossRefService {
@@ -39,7 +40,7 @@ public class CrossRefService {
 		return Arrays.stream(items).map(CrossRefService::mapItemToPaper).collect(Collectors.toCollection(ArrayList::new));
 	}
 
-	public static Paper getMetadataFromDoi(String doi) throws IOException, InterruptedException, URISyntaxException {
+	public static CompletableFuture<HttpResponse<String>> getMetadataFromDoi(String doi) throws URISyntaxException {
 		var httpClient = HttpClient.newHttpClient();
 		String urlString = crossRefUrl + "works/" + doi;
 		urlString = ParamBuilder.addParam(urlString, "mailto", "bongutcha@gmail.com");
@@ -48,11 +49,16 @@ public class CrossRefService {
 		var uri = new URI(urlString);
 		var httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
 
-		String response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
-		Item item = new Gson().fromJson(response, GetMetadataResponse.class).getMessage();
+		return httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
 
-		return mapItemToPaper(item);
 	}
+
+	// Serialized parallel API calls
+//	private static <T> T serializeParallelCalls(HttpRequest request) {
+//		HttpClient httpClient = HttpClient.newHttpClient();
+//
+////		var response = httpClient.
+//	}
 
 	// Mappers
 
@@ -76,19 +82,26 @@ public class CrossRefService {
 
 
 
-	public static ArrayList<Paper> getRelatedPapers(Paper paper, int depth) throws InterruptedException, IOException, URISyntaxException {
+	public static ArrayList<Paper> getRelatedPapers(Paper paper, int depth) throws URISyntaxException {
 
 		return getConnections(paper, depth);
 	}
 
-	private static ArrayList<Paper> getConnections(Paper paper, int depth) throws InterruptedException, IOException, URISyntaxException {
+	private static ArrayList<Paper> getConnections(Paper paper, int depth) throws URISyntaxException {
 		// TODO: Only get depth amount of references
-		// TODO: Parallelize
 		ArrayList<Paper> references = new ArrayList<>();
+		ArrayList<CompletableFuture<HttpResponse<String>>> responses = new ArrayList<>();
+
 		if(paper.getReferences() != null) {
 			for(int i = 0; i < paper.getReferences().size(); i++) {
-				references.add(getMetadataFromDoi(paper.getReferences().get(i).getDoi()));
+				responses.add(getMetadataFromDoi(paper.getReferences().get(i).getDoi()));
 			}
+
+			// Join response, then map item to paper and add into references
+			references = responses.stream()
+					.map(response -> mapItemToPaper(
+							new Gson().fromJson(response.join().body(), GetMetadataResponse.class).getMessage()))
+					.collect(Collectors.toCollection(ArrayList::new));
 		}
 
 		return references;

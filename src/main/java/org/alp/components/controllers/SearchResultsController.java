@@ -82,7 +82,7 @@ public class SearchResultsController {
 		resultsTable.getColumns().addAll(titleColumn, authorColumn);
 	}
 
-	public void onShowButtonMouseClick(MouseEvent mouseEvent) throws InterruptedException, IOException, URISyntaxException {
+	public void onShowButtonMouseClick(MouseEvent mouseEvent) throws URISyntaxException {
 		System.out.println("clicked show button");
 		if(this.selectedPaper == null) {
 			System.out.println("No Paper selected");
