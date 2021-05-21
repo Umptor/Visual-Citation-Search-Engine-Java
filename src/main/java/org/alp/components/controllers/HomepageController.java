@@ -25,33 +25,7 @@ public class HomepageController {
 	public TextField searchTextField;
 	public Button homepageSearchButton;
 
-	public HomepageController() {
-
-	}
-
-	private void showExampleGraph() {
-				Graph graph = new SingleGraph("Tutorial 1");
-
-		graph.addNode("A" );
-		graph.addNode("B" );
-		graph.addNode("C" );
-		graph.addEdge("AB", "A", "B");
-		graph.addEdge("BC", "B", "C");
-		graph.addEdge("CA", "C", "A");
-
-		System.setProperty("org.graphstream.ui", "javafx");
-
-
-		graph.forEach((Node node) -> node.setAttribute("ui.label", "" + node.getId()));
-
-		Node a = graph.getNode("A");
-		a.setAttribute("ui.class", "marked");
-		String stylesheet = CssReader.getInstance().getFile();
-//		a
-
-		graph.setAttribute("ui.stylesheet", stylesheet);
-		graph.display();
-	}
+	public HomepageController() { }
 
 	@FXML
 	public void initialize() {
