@@ -86,8 +86,8 @@ public class SearchResultsController {
 		resultsTable.getColumns().addAll(titleColumn, authorColumn, referenceCountColumn);
 	}
 
-	public void onShowButtonMouseClick(MouseEvent mouseEvent) throws URISyntaxException {
-		System.out.println("clicked show button");
+	public void onShowButtonMouseClick(MouseEvent mouseEvent) throws URISyntaxException, InterruptedException {
+		System.out.println("clicked show button\nGood Luck, this might take a while");
 		if(this.selectedPaper == null) {
 			System.out.println("No Paper selected");
 			return;
@@ -106,7 +106,7 @@ public class SearchResultsController {
 		}
 		assert selected != null;
 
-		selected.setReferences(CrossRefService.getRelatedPapers(selected, 2));
+		CrossRefService.getRelatedPapers(selected, 2);
 
 		graph.addNode(selected, selected.getReferences());
 

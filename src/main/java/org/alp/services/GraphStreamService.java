@@ -18,29 +18,35 @@ public class GraphStreamService {
 	}
 
 	public void addNode(Paper paper, ArrayList<Paper> edges) {
+		if(paper == null || paper.getTitle() == null) {
+			return;
+		}
 		var node = this.addNode(paper);
+		if(edges == null) {
+			return;
+		}
 
-		for(Paper edge : edges) {
-			var secondNode = graph.nodes()
-					.filter((Node nodeForEach) -> nodeForEach.getId().equals(edge.getDoi()))
-					.findFirst().orElse(null);
-
-			if(secondNode == null) {
-				secondNode = this.addNode(edge);
-			}
-
+		edges.stream().filter((Paper edge) -> edge.getTitle() != null).map(this::addNode).forEach(secondNode -> {
 			String newEdgeId = getEdgeId(node, secondNode);
 			if(graph.edges().noneMatch((Edge existingEdge) -> existingEdge.getId().equals(newEdgeId))) {
-				graph.addEdge(newEdgeId, node, secondNode);
+				Edge edge = graph.addEdge(newEdgeId, node, secondNode);
+				edge.setAttribute("isDirected", true);
 			}
-		}
+		});
+		paper.getReferences().forEach((Paper reference) -> addNode(reference, reference.getReferences()));
 	}
 
 
 	private Node addNode(Paper paper) {
-		Node node = graph.addNode(paper.getDoi());
-		if(root == null) this.setRoot(node);
-		node.setAttribute("ui.label", "" + paper.getTitle());
+		Node node = graph.nodes()
+				.filter((Node node2) -> node2.getId().equals(paper.getDoi()))
+				.findFirst().orElse(null);
+
+		if(node == null) {
+			node = graph.addNode(paper.getDoi());
+			if(root == null) this.setRoot(node);
+			node.setAttribute("ui.label", "" + paper.getTitle());
+		}
 
 		return node;
 	}
