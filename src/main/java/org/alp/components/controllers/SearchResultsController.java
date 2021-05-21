@@ -9,11 +9,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import org.alp.models.Paper;
+import org.alp.models.PaperTableElement;
 import org.alp.services.CrossRefService;
 import org.alp.services.GraphStreamService;
 import org.alp.services.PaperService;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 

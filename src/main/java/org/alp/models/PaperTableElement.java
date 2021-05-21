@@ -1,4 +1,4 @@
-package org.alp.components.controllers;
+package org.alp.models;
 
 public class PaperTableElement {
 	private String title;
