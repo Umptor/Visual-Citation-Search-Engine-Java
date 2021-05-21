@@ -47,7 +47,7 @@ public class SearchResultsController {
 			if(paper.getAuthors() != null) {
 				author = paper.getAuthors()[0].getFullname();
 			}
-			var a = new PaperTableElement(title, author, paper.getDoi());
+			var a = new PaperTableElement(title, author, paper.getDoi(), paper.getReferences() == null ? 0 : paper.getReferences().size());
 			resultsTable.getItems().add(a);
 		});
 
@@ -79,7 +79,11 @@ public class SearchResultsController {
 		authorColumn.setCellValueFactory(new PropertyValueFactory<>("author"));
 		authorColumn.setMaxWidth(200.0);
 
-		resultsTable.getColumns().addAll(titleColumn, authorColumn);
+		TableColumn<PaperTableElement, Integer> referenceCountColumn = new TableColumn<>("Reference Count");
+		referenceCountColumn.setCellValueFactory(new PropertyValueFactory<>("referenceCount"));
+		referenceCountColumn.setMaxWidth(200.0);
+
+		resultsTable.getColumns().addAll(titleColumn, authorColumn, referenceCountColumn);
 	}
 
 	public void onShowButtonMouseClick(MouseEvent mouseEvent) throws URISyntaxException {

@@ -4,11 +4,14 @@ public class PaperTableElement {
 	private String title;
 	private String author;
 	private String doi;
+	private Integer referenceCount;
 
-	public PaperTableElement(String title, String author, String doi) {
+
+	public PaperTableElement(String title, String author, String doi, int referenceCount) {
 		this.title = title;
 		this.author = author;
 		this.doi = doi;
+		this.referenceCount = referenceCount;
 	}
 
 	public String getTitle() {
@@ -33,5 +36,13 @@ public class PaperTableElement {
 
 	public void setDoi(String doi) {
 		this.doi = doi;
+	}
+
+	public Integer getReferenceCount() {
+		return referenceCount;
+	}
+
+	public void setReferenceCount(Integer referenceCount) {
+		this.referenceCount = referenceCount;
 	}
 }
