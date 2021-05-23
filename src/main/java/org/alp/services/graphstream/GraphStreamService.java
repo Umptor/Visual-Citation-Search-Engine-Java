@@ -7,18 +7,25 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.ui.view.Viewer;
 
 import java.util.ArrayList;
 
 public class GraphStreamService {
 	private final Graph graph = new SingleGraph("Citation Graph");
+	private final Viewer viewer;
+	private final PaperTreeViewerListener listener;
 	private Node root = null;
 	private Paper rootPaper = null;
 
 	public GraphStreamService() {
 		System.setProperty("org.graphstream.ui", "javafx");
-		new OnClickViewerListener(graph, this);
 		this.setStyleSheet();
+
+		this.viewer = graph.display();
+
+		this.viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.HIDE_ONLY);
+		this.listener = new PaperTreeViewerListener(this, graph, viewer);
 	}
 
 	public Graph getGraph() {

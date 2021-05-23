@@ -152,7 +152,7 @@ public class CrossRefService {
 					nextLevel.add(neighbour);
 				}
 			}
-			currentLevel = nextLevel;
+			currentLevel = new ArrayList<>(nextLevel);
 			nextLevel.clear();
 		}
 		System.out.println("Paper not found, huh?");

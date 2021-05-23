@@ -6,28 +6,22 @@ import org.graphstream.ui.view.ViewerListener;
 import org.graphstream.ui.view.ViewerPipe;
 
 
-public class OnClickViewerListener implements ViewerListener {
-	private final Graph graph;
-	private final Viewer viewer;
+public class PaperTreeViewerListener implements ViewerListener {
 	private final GraphStreamService graphStreamService;
+	private final ViewerPipe viewerPipe;
 	private boolean loop = true;
 
-	public OnClickViewerListener(Graph graph, GraphStreamService graphStreamService) {
-		this.graph = graph;
+	public PaperTreeViewerListener(GraphStreamService graphStreamService, Graph graph, Viewer viewer) {
 		this.graphStreamService = graphStreamService;
 
-		viewer = graph.display();
-
-		viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.HIDE_ONLY);
-
-		ViewerPipe fromViewer = viewer.newViewerPipe();
-		fromViewer.addViewerListener(this);
-		fromViewer.addSink(graph);
+		this.viewerPipe = viewer.newViewerPipe();
+		this.viewerPipe.addViewerListener(this);
+		this.viewerPipe.addSink(graph);
 
 		new Thread(() -> {
 			while(loop) {
 				try {
-					fromViewer.blockingPump();
+					this.viewerPipe.blockingPump();
 				} catch(InterruptedException e) {
 					e.printStackTrace();
 				}
