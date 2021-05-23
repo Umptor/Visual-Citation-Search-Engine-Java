@@ -6,7 +6,7 @@ import org.alp.models.crossrefApi.Reference;
 
 public class GetMetaDataMessage extends Item {
 
-	public GetMetaDataMessage(int referenceCount, String doi, String isReferencedByCount, String[] title, String[] containerTitle, Author[] authors, float score, Reference[] references) {
-		super(referenceCount, doi, isReferencedByCount, title, containerTitle, authors, score, references);
+	public GetMetaDataMessage(int referenceCount, String doi, String isReferencedByCount, String[] title, String[] containerTitle, Author[] authors, float score, Reference[] references, String paperAbstract) {
+		super(referenceCount, doi, isReferencedByCount, title, containerTitle, authors, score, references, paperAbstract);
 	}
 }

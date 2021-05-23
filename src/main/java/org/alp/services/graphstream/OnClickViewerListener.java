@@ -35,6 +35,8 @@ public class OnClickViewerListener implements ViewerListener {
 		}).start();
 	}
 
+	String pushedId = "";
+
 	@Override
 	public void viewClosed(String s) {
 		loop = false;
@@ -42,22 +44,24 @@ public class OnClickViewerListener implements ViewerListener {
 	}
 
 	@Override
-	public void buttonPushed(String s) {
-		System.out.println("button Pushed" + s);
+	public void buttonPushed(String id) {
+		pushedId = id;
 	}
 
 	@Override
-	public void buttonReleased(String s) {
-		System.out.println("button released");
+	public void buttonReleased(String id) {
+		if(pushedId.equals(id)) {
+			graphStreamService.selectNode(id);
+		} else {
+			System.out.println("Make up your mind and select something");
+		}
 	}
 
 	@Override
 	public void mouseOver(String s) {
-		System.out.println("mouse over");
 	}
 
 	@Override
 	public void mouseLeft(String s) {
-		System.out.println("mouse left");
 	}
 }

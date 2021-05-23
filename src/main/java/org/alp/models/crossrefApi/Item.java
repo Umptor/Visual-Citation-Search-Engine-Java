@@ -26,7 +26,12 @@ public class Item {
 	@SerializedName("reference")
 	private Reference[] references;
 
-	public Item(int referenceCount, String doi, String isReferencedByCount, String[] title, String[] containerTitle, Author[] authors, float score, Reference[] references) {
+
+	@SerializedName("abstract")
+	private String paperAbstract;
+
+	public Item(int referenceCount, String doi, String isReferencedByCount, String[] title, String[] containerTitle,
+	            Author[] authors, float score, Reference[] references, String paperAbstract) {
 		this.referenceCount = referenceCount;
 		this.doi = doi;
 		this.isReferencedByCount = isReferencedByCount;
@@ -35,6 +40,7 @@ public class Item {
 		this.authors = authors;
 		this.score = score;
 		this.references = references;
+		this.paperAbstract = paperAbstract;
 	}
 
 	public int getReferenceCount() {
@@ -99,5 +105,13 @@ public class Item {
 
 	public void setReferences(Reference[] references) {
 		this.references = references;
+	}
+
+	public String getPaperAbstract() {
+		return paperAbstract;
+	}
+
+	public void setPaperAbstract(String paperAbstract) {
+		this.paperAbstract = paperAbstract;
 	}
 }

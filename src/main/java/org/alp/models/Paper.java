@@ -14,11 +14,15 @@ public class Paper {
 
 	private ArrayList<Paper> references;
 
-	public Paper(String doi, String title, Author[] authors, ArrayList<Paper> references) {
+	private String paperAbstract;
+
+	public Paper(String doi, String title, Author[] authors, ArrayList<Paper> references, String paperAbstract) {
 		this.doi = doi;
 		this.title = title;
 		this.authors = authors;
 		this.references = references;
+		this.paperAbstract = paperAbstract;
+		this.formatAbstract();
 	}
 
 	public Paper() {}
@@ -53,5 +57,20 @@ public class Paper {
 
 	public void setReferences(ArrayList<Paper> references) {
 		this.references = references;
+	}
+
+	public String getPaperAbstract() {
+		return paperAbstract;
+	}
+
+	public void setPaperAbstract(String paperAbstract) {
+		this.paperAbstract = paperAbstract;
+	}
+
+	private void formatAbstract() {
+		if(this.paperAbstract != null) {
+			this.paperAbstract = this.paperAbstract.replace("<jats:p>", "");
+			this.paperAbstract = this.paperAbstract.replace("</jats:p>", "");
+		}
 	}
 }

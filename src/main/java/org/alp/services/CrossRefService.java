@@ -32,8 +32,8 @@ public class CrossRefService {
 	public static ArrayList<Paper> getPaperByKeyWord(String keyword) throws URISyntaxException, IOException, InterruptedException {
 		var httpClient = HttpClient.newHttpClient();
 		String urlString = crossRefUrl + "works";
-		urlString = ParamBuilder.addParam(urlString, "query", keyword);
-		urlString = ParamBuilder.addParam(urlString, "mailto", "bongutcha@gmail.com");
+		urlString = ParamBuilder.addParam(urlString, "query", URLEncoder.encode(keyword, StandardCharsets.UTF_8));
+		urlString = ParamBuilder.addParam(urlString, "mailto", "e160503134@stud.tau.edu.tr");
 		var uri = new URI(urlString);
 
 		var httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
@@ -47,7 +47,7 @@ public class CrossRefService {
 	public static CompletableFuture<HttpResponse<String>> getMetadataFromDoi(String doi) throws URISyntaxException {
 		var httpClient = HttpClient.newHttpClient();
 		String urlString = crossRefUrl + "works/" + URLEncoder.encode(doi, StandardCharsets.UTF_8);
-		urlString = ParamBuilder.addParam(urlString, "mailto", "bongutcha@gmail.com");
+		urlString = ParamBuilder.addParam(urlString, "mailto", "e160503134@stud.tau.edu.tr");
 
 
 		var uri = new URI(urlString);
@@ -56,15 +56,6 @@ public class CrossRefService {
 		return httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
 
 	}
-
-	// Serialized parallel API calls
-//	private static <T> T serializeParallelCalls(HttpRequest request) {
-//		HttpClient httpClient = HttpClient.newHttpClient();
-//
-////		var response = httpClient.
-//	}
-
-	// Mappers
 
 	private static Paper mapItemToPaper(Item item) {
 		List<Paper> references;
@@ -84,7 +75,7 @@ public class CrossRefService {
 		return new Paper(item.getDoi(),
 				item.getTitle() == null || item.getTitle().length == 0 ? null : item.getTitle()[0],
 				item.getAuthors(),
-				references == null ? null : (ArrayList<Paper>) references);
+				references == null ? null : (ArrayList<Paper>) references, item.getPaperAbstract());
 	}
 
 
@@ -135,6 +126,37 @@ public class CrossRefService {
 			System.out.println(exception.toString());
 		}
 		return returnValue;
+	}
+
+	public static Paper findPaper(Paper rootPaper, String doiToFind) {
+
+		// BFS Search for paper
+		ArrayList<Paper> currentLevel = new ArrayList<>();
+		ArrayList<Paper> nextLevel = new ArrayList<>();
+		currentLevel.add(rootPaper);
+		if(rootPaper.getDoi().equals(doiToFind)) {
+			return rootPaper;
+		}
+		while(currentLevel.size() > 0) {
+			for(Paper paperInLevel: currentLevel) {
+				if(paperInLevel == null || paperInLevel.getReferences() == null) {
+					continue;
+				}
+				for(Paper neighbour: paperInLevel.getReferences()) {
+					if(neighbour == null) {
+						continue;
+					}
+					if(neighbour.getDoi().equals(doiToFind)) {
+						return neighbour;
+					}
+					nextLevel.add(neighbour);
+				}
+			}
+			currentLevel = nextLevel;
+			nextLevel.clear();
+		}
+		System.out.println("Paper not found, huh?");
+		return new Paper();
 	}
 }
 

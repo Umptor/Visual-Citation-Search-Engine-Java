@@ -1,6 +1,7 @@
 package org.alp.services.graphstream;
 
 import org.alp.models.Paper;
+import org.alp.services.CrossRefService;
 import org.alp.services.CssReader;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 public class GraphStreamService {
 	private final Graph graph = new SingleGraph("Citation Graph");
 	private Node root = null;
+	private Paper rootPaper = null;
 
 	public GraphStreamService() {
 		System.setProperty("org.graphstream.ui", "javafx");
@@ -50,7 +52,10 @@ public class GraphStreamService {
 
 		if(node == null) {
 			node = graph.addNode(paper.getDoi());
-			if(root == null) this.setRoot(node);
+			if(root == null) {
+				this.setRoot(node);
+				this.rootPaper = paper;
+			}
 			node.setAttribute("ui.label", "" + paper.getTitle());
 		}
 
@@ -78,4 +83,22 @@ public class GraphStreamService {
 	private String getEdgeId(String node1, String node2) {
 		return node1 + node2;
 	}
+
+	protected void selectNode(String nodeDoi) {
+		Node node = graph.getNode(nodeDoi);
+		if(node == null) {
+			System.out.println("This isn't a node you dum dum");
+		}
+
+		Paper selectedPaper = CrossRefService.findPaper(rootPaper, nodeDoi);
+
+		if(selectedPaper.getPaperAbstract() == null || selectedPaper.getPaperAbstract().equals("")) {
+			System.out.println("Paper with DOI: " + selectedPaper.getDoi() + " unfortunately has no abstract in database");
+		} else {
+			System.out.println("Abstract: " + selectedPaper.getPaperAbstract());
+		}
+
+
+	}
+
 }
