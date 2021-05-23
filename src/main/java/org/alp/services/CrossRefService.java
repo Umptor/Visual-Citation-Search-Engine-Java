@@ -104,6 +104,7 @@ public class CrossRefService {
 			references = responses.stream()
 					.map(response -> mapItemToPaper(
 							jsonMapperToBody(response.join().body(), GetMetadataResponse.class).getMessage()))
+					.filter((Paper reference) -> reference.getTitle() != null || !reference.getTitle().equals(""))
 					.collect(Collectors.toCollection(ArrayList::new));
 
 			for(Paper reference : references) {

@@ -10,6 +10,9 @@ import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.view.Viewer;
 
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Stack;
+import java.util.stream.Collectors;
 
 public class GraphStreamService {
 	private final Graph graph = new SingleGraph("Citation Graph");
@@ -23,6 +26,7 @@ public class GraphStreamService {
 		this.setStyleSheet();
 
 		this.viewer = graph.display();
+		this.viewer.disableAutoLayout();
 
 		this.viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.HIDE_ONLY);
 		this.listener = new PaperTreeViewerListener(this, graph, viewer);
@@ -32,7 +36,33 @@ public class GraphStreamService {
 		return graph;
 	}
 
-	public void addNode(Paper paper, ArrayList<Paper> edges) {
+	public void fillGraph(Paper paper, ArrayList<Paper> edges) {
+		this.addNode(paper, edges);
+		determineCoordinates();
+	}
+
+	public void determineCoordinates() {
+		PaperCoordinateGiver.initialize().determineCoordinates(rootPaper);
+		Stack<Paper> papers = new Stack<>();
+		papers.push(rootPaper);
+
+		while(!papers.isEmpty()) {
+			var current = papers.pop();
+			var node = this.graph.getNode(current.getDoi());
+			if(node == null) {
+				continue;
+			}
+			node.setAttribute("xyz", current.getX(), current.getY(), current.getZ());
+
+			if(current.getReferences() != null)
+				current.getReferences().stream()
+						.filter((Paper paper) -> Objects.nonNull(paper) && paper.getTitle() != null).collect(Collectors.toList())
+						.forEach(papers::push);
+		}
+
+	}
+
+	private void addNode(Paper paper, ArrayList<Paper> edges) {
 		if(paper == null || paper.getTitle() == null) {
 			return;
 		}
@@ -48,7 +78,7 @@ public class GraphStreamService {
 				edge.setAttribute("isDirected", true);
 			}
 		});
-		paper.getReferences().forEach((Paper reference) -> addNode(reference, reference.getReferences()));
+		paper.getReferences().forEach((Paper reference) -> fillGraph(reference, reference.getReferences()));
 	}
 
 

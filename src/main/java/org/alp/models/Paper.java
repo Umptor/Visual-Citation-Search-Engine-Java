@@ -16,6 +16,10 @@ public class Paper {
 
 	private String paperAbstract;
 
+	private float x;
+	private float y;
+	private float z;
+
 	public Paper(String doi, String title, Author[] authors, ArrayList<Paper> references, String paperAbstract) {
 		this.doi = doi;
 		this.title = title;
@@ -72,5 +76,29 @@ public class Paper {
 			this.paperAbstract = this.paperAbstract.replace("<jats:p>", "");
 			this.paperAbstract = this.paperAbstract.replace("</jats:p>", "");
 		}
+	}
+
+	public float getX() {
+		return x;
+	}
+
+	public void setX(float x) {
+		this.x = x;
+	}
+
+	public float getY() {
+		return y;
+	}
+
+	public void setY(float y) {
+		this.y = y;
+	}
+
+	public float getZ() {
+		return z;
+	}
+
+	public void setZ(float z) {
+		this.z = z;
 	}
 }
