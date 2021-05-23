@@ -11,7 +11,7 @@ import javafx.scene.input.MouseEvent;
 import org.alp.models.Paper;
 import org.alp.models.PaperTableElement;
 import org.alp.services.CrossRefService;
-import org.alp.services.GraphStreamService;
+import org.alp.services.graphstream.GraphStreamService;
 import org.alp.services.PaperService;
 
 import java.net.URISyntaxException;

@@ -1,10 +1,13 @@
-package org.alp.services;
+package org.alp.services.graphstream;
 
 import org.alp.models.Paper;
+import org.alp.services.CssReader;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.ui.view.Viewer;
+import org.graphstream.ui.view.ViewerPipe;
 
 import java.util.ArrayList;
 
