@@ -6,8 +6,6 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
-import org.graphstream.ui.view.Viewer;
-import org.graphstream.ui.view.ViewerPipe;
 
 import java.util.ArrayList;
 
@@ -17,7 +15,12 @@ public class GraphStreamService {
 
 	public GraphStreamService() {
 		System.setProperty("org.graphstream.ui", "javafx");
+		new OnClickViewerListener(graph, this);
 		this.setStyleSheet();
+	}
+
+	public Graph getGraph() {
+		return graph;
 	}
 
 	public void addNode(Paper paper, ArrayList<Paper> edges) {
@@ -52,10 +55,6 @@ public class GraphStreamService {
 		}
 
 		return node;
-	}
-
-	public void showGraph() {
-		this.graph.display();
 	}
 
 	private void setRoot(Node root) {

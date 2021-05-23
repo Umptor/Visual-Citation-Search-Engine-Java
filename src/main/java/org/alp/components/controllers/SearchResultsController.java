@@ -109,7 +109,5 @@ public class SearchResultsController {
 		CrossRefService.getRelatedPapers(selected, 2);
 
 		graph.addNode(selected, selected.getReferences());
-
-		graph.showGraph();
 	}
 }
