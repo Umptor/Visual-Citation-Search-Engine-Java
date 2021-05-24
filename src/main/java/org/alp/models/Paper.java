@@ -1,6 +1,7 @@
 package org.alp.models;
 
 import org.alp.models.crossrefApi.Author;
+import org.alp.models.crossrefApi.PublishTime;
 
 import java.util.ArrayList;
 
@@ -16,17 +17,23 @@ public class Paper {
 
 	private String paperAbstract;
 
-	private float x;
-	private float y;
-	private float z;
+	private PublishTime publishedPrint;
+	private PublishTime publishedOnline;
 
-	public Paper(String doi, String title, Author[] authors, ArrayList<Paper> references, String paperAbstract) {
+	private Float x;
+	private Float y;
+	private Float z;
+
+	public Paper(String doi, String title, Author[] authors, ArrayList<Paper> references, String paperAbstract,
+	             PublishTime publishedPrint, PublishTime publishedOnline) {
 		this.doi = doi;
 		this.title = title;
 		this.authors = authors;
 		this.references = references;
 		this.paperAbstract = paperAbstract;
+		this.publishedOnline = publishedOnline;
 		this.formatAbstract();
+		this.publishedPrint = publishedPrint;
 	}
 
 	public Paper() {}
@@ -78,27 +85,75 @@ public class Paper {
 		}
 	}
 
-	public float getX() {
+	public Float getX() {
 		return x;
 	}
 
-	public void setX(float x) {
+	public void setX(Float x) {
 		this.x = x;
 	}
 
-	public float getY() {
+	public Float getY() {
 		return y;
 	}
 
-	public void setY(float y) {
+	public void setY(Float y) {
 		this.y = y;
 	}
 
-	public float getZ() {
+	public Float getZ() {
 		return z;
 	}
 
-	public void setZ(float z) {
+	public void setZ(Float z) {
 		this.z = z;
+	}
+
+	public PublishTime getPublishedPrint() {
+		return publishedPrint;
+	}
+
+	public void setPublishedPrint(PublishTime publishTime) {
+		this.publishedPrint = publishTime;
+	}
+
+	public PublishTime getPublishedOnline() {
+		return publishedOnline;
+	}
+
+	public void setPublishedOnline(PublishTime publishedOnline) {
+		this.publishedOnline = publishedOnline;
+	}
+
+	/* Logic Starts Here */
+	public Integer getYear() {
+		Integer printYear = publishedPrint  == null ? null : publishedPrint.getYear();
+		Integer onlineYear = publishedOnline == null ? null : publishedOnline.getYear();
+		return returnMinDate(printYear, onlineYear);
+	}
+
+	public Integer getMonth() {
+		Integer printMonth = publishedPrint  == null ? null : publishedPrint.getMonth();
+		Integer onlineMonth = publishedOnline == null ? null : publishedOnline.getMonth();
+		Integer month = returnMinDate(printMonth, onlineMonth);
+		return month == null ? PublishTime.DEFAULT_MONTH : null;
+	}
+
+	public Integer getDay() {
+		Integer printDay = publishedPrint  == null ? null : publishedPrint.getDay();
+		Integer onlineDay = publishedOnline == null ? null : publishedOnline.getDay();
+		Integer day = returnMinDate(printDay, onlineDay);
+		return day == null ? PublishTime.DEFAULT_DAY : null;
+	}
+
+	private Integer returnMinDate(Integer printDate, Integer onlineDate) {
+
+		if(printDate != null) {
+			if(onlineDate != null) {
+				return Math.min(printDate, onlineDate);
+			}
+			return printDate;
+		}
+		return onlineDate;
 	}
 }

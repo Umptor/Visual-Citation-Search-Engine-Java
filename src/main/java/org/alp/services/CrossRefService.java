@@ -39,7 +39,9 @@ public class CrossRefService {
 		var httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
 
 		String response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
-		var items = jsonMapperToBody(response, GetWorksResponse.class).getMessage().getItems();
+		var items = jsonMapperToBody(response, GetWorksResponse.class)
+				.getMessage()
+				.getItems();
 
 		return Arrays.stream(items).map(CrossRefService::mapItemToPaper).collect(Collectors.toCollection(ArrayList::new));
 	}
@@ -75,7 +77,8 @@ public class CrossRefService {
 		return new Paper(item.getDoi(),
 				item.getTitle() == null || item.getTitle().length == 0 ? null : item.getTitle()[0],
 				item.getAuthors(),
-				references == null ? null : (ArrayList<Paper>) references, item.getPaperAbstract());
+				references == null ? null : (ArrayList<Paper>) references, item.getPaperAbstract(),
+				item.getPublishedPrint(), item.getPublishedOnline());
 	}
 
 

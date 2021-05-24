@@ -52,11 +52,17 @@ public class GraphStreamService {
 			if(node == null) {
 				continue;
 			}
+			current.setZ(0f);
+			if(current.getX() == null || current.getY() == null) {
+				System.out.println("wtf");
+			}
 			node.setAttribute("xyz", current.getX(), current.getY(), current.getZ());
 
 			if(current.getReferences() != null)
 				current.getReferences().stream()
-						.filter((Paper paper) -> Objects.nonNull(paper) && paper.getTitle() != null).collect(Collectors.toList())
+						.filter((Paper paper) -> Objects.nonNull(paper) && paper.getTitle() != null &&
+								(paper.getPublishedPrint() != null || paper.getPublishedOnline() != null))
+						.collect(Collectors.toList())
 						.forEach(papers::push);
 		}
 
@@ -78,7 +84,7 @@ public class GraphStreamService {
 				edge.setAttribute("isDirected", true);
 			}
 		});
-		paper.getReferences().forEach((Paper reference) -> fillGraph(reference, reference.getReferences()));
+		paper.getReferences().forEach((Paper reference) -> addNode(reference, reference.getReferences()));
 	}
 
 
@@ -135,7 +141,10 @@ public class GraphStreamService {
 			System.out.println("Abstract: " + selectedPaper.getPaperAbstract());
 		}
 
+		System.out.println("Date: ");
+		System.out.println(selectedPaper.getDay() + "/" + selectedPaper.getMonth() + "/" + selectedPaper.getYear());
 
+		System.out.println(selectedPaper.getX() + " " + selectedPaper.getY());
 	}
 
 }

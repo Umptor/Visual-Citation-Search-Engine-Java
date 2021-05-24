@@ -26,12 +26,17 @@ public class Item {
 	@SerializedName("reference")
 	private Reference[] references;
 
-
 	@SerializedName("abstract")
 	private String paperAbstract;
 
+	@SerializedName("published-print")
+	private PublishTime publishedPrint;
+
+	@SerializedName("published-online")
+	private PublishTime publishedOnline;
+
 	public Item(int referenceCount, String doi, String isReferencedByCount, String[] title, String[] containerTitle,
-	            Author[] authors, float score, Reference[] references, String paperAbstract) {
+	            Author[] authors, float score, Reference[] references, String paperAbstract, PublishTime publishedPrint, PublishTime publishedOnline) {
 		this.referenceCount = referenceCount;
 		this.doi = doi;
 		this.isReferencedByCount = isReferencedByCount;
@@ -41,6 +46,8 @@ public class Item {
 		this.score = score;
 		this.references = references;
 		this.paperAbstract = paperAbstract;
+		this.publishedPrint = publishedPrint;
+		this.publishedOnline = publishedOnline;
 	}
 
 	public int getReferenceCount() {
@@ -113,5 +120,51 @@ public class Item {
 
 	public void setPaperAbstract(String paperAbstract) {
 		this.paperAbstract = paperAbstract;
+	}
+
+	public PublishTime getPublishedPrint() {
+		return publishedPrint;
+	}
+
+	public void setPublishedPrint(PublishTime publishTime) {
+		this.publishedPrint = publishTime;
+	}
+
+	public PublishTime getPublishedOnline() {
+		return publishedOnline;
+	}
+
+	public void setPublishedOnline(PublishTime publishedOnline) {
+		this.publishedOnline = publishedOnline;
+	}
+
+	/* Logic Starts Here */
+	public Integer getYear() {
+		Integer printYear = this.getPublishedPrint().getYear();
+		Integer onlineYear = this.getPublishedOnline().getYear();
+		return returnMinDate(printYear, onlineYear);
+	}
+
+	public Integer getMonth() {
+		Integer printMonth = this.getPublishedOnline().getYear();
+		Integer onlineMonth = this.getPublishedPrint().getYear();
+		return returnMinDate(printMonth, onlineMonth);
+	}
+
+	public Integer getDay() {
+		Integer printDay = this.getPublishedPrint().getYear();
+		Integer onlineDay = this.getPublishedOnline().getYear();
+		return returnMinDate(printDay, onlineDay);
+	}
+
+	private Integer returnMinDate(Integer printDate, Integer onlineDate) {
+
+		if(printDate != null) {
+			if(onlineDate != null) {
+				return Math.min(printDate, onlineDate);
+			}
+			return printDate;
+		}
+		return onlineDate;
 	}
 }
