@@ -3,9 +3,11 @@ package org.alp.services.graphstream;
 import org.alp.models.Paper;
 import org.alp.models.crossrefApi.Reference;
 import org.alp.services.DateService;
+import org.alp.services.PaperService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.stream.Collectors;
@@ -37,6 +39,9 @@ public class PaperCoordinateGiver {
 
 	private void determineCoordinatesAlgo(Paper root) {
 		if(root.getReferences() == null || root.getReferences().size() == 0) {
+			root.setX(0f);
+			root.setY(0f);
+			root.setZ(0f);
 			return;
 		}
 
@@ -46,8 +51,8 @@ public class PaperCoordinateGiver {
 		float smallestYear = (float) Math.min(determineX(rootArr), root.getPublishedPrint().getYear());
 //		float smallestYear = (float) root.getPublishedPrint().getYear();
 //		determineX(root.getReferences());
-		determineY(rootArr);
-		determineZ(rootArr);
+		determineY(root);
+		determineZ(root);
 
 		// Normalize X
 		Stack<Paper> papers = new Stack<>();
@@ -95,24 +100,37 @@ public class PaperCoordinateGiver {
 		return smallestYear[0];
 	}
 
-	private void determineY(ArrayList<Paper> papers) {
-		if(papers == null) return;
-		papers.stream().filter(paper -> paper.getTitle() != null &&
-				(paper.getPublishedPrint() != null || paper.getPublishedOnline() != null) && paper.getY() == null)
-				.forEach((Paper paper) -> {
-					if(paper.getDoi().equals("10.1002/j.2050-0416.1972.tb03485.x"))
-						System.out.println("wtf");
-			paper.setY(((float) numY));
-			numY -= 0.5f;
-		});
-		papers.forEach((Paper paper) -> determineY(paper.getReferences()));
+	private void determineY(Paper root) {
+		if(root == null || root.getTitle() == null) return;
+
+//		ArrayList<Paper> papers = PaperService.flattenPapers(root);
+
+		ArrayList<Paper> sortedReferences = PaperService.sortReferencesByDecreasingYear(root);
+
+
+
+//		papers.stream().filter(paper -> paper.getTitle() != null &&
+//				(paper.getPublishedPrint() != null || paper.getPublishedOnline() != null) && paper.getY() == null)
+//				.forEach((Paper paper) -> {
+//			paper.setY(((float) numY));
+//			numY -= 0.5f;
+//		});
 	}
 
-	private void determineZ(ArrayList<Paper> papers) {
-		if(papers == null) return;
-		papers.forEach((Paper paper) -> {
-			paper.setZ(0f);
-		});
-		papers.forEach((Paper paper) -> determineY(paper.getReferences()));
+	private float differenceBetweenNodes = -0.5f;
+
+	private float determineYAlgo(Paper root, float height) {
+		if(root == null || root.getTitle() == null) return height +  differenceBetweenNodes;
+
+
+
+
+	}
+
+	private void determineZ(Paper root) {
+		if(root == null) return;
+
+		ArrayList<Paper> papers = PaperService.flattenPapers(root);
+		papers.forEach(paper -> paper.setZ(0f));
 	}
 }

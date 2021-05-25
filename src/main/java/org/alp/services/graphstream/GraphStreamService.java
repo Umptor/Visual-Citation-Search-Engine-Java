@@ -52,7 +52,7 @@ public class GraphStreamService {
 			if(node == null) {
 				continue;
 			}
-			current.setZ(0f);
+//			current.setZ(0f);
 			if(current.getX() == null || current.getY() == null) {
 				System.out.println("wtf");
 			}
@@ -144,7 +144,7 @@ public class GraphStreamService {
 		System.out.println("Date: ");
 		System.out.println(selectedPaper.getDay() + "/" + selectedPaper.getMonth() + "/" + selectedPaper.getYear());
 
-		System.out.println(selectedPaper.getX() + " " + selectedPaper.getY());
+		System.out.println(selectedPaper.getX() + " " + selectedPaper.getY() + " " + selectedPaper.getZ());
 	}
 
 }
