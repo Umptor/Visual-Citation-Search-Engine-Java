@@ -1,13 +1,11 @@
 package org.alp.services.graphstream;
 
 import org.alp.models.Paper;
-import org.alp.models.crossrefApi.Reference;
 import org.alp.services.DateService;
 import org.alp.services.PaperService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.stream.Collectors;
@@ -18,30 +16,33 @@ public class PaperCoordinateGiver {
 
 	private boolean calculated = false;
 
+	private final float defaultX = 0;
+	private final float defaultY = 0;
+	private final float defaultZ = 0;
+	private final float differenceBetweenNodesY = -1f;
+
+
 	private PaperCoordinateGiver() {}
 
 	public static PaperCoordinateGiver initialize() {
-		if(paperCoordinateGiver != null) {
-			return paperCoordinateGiver;
+		if(paperCoordinateGiver == null) {
+			paperCoordinateGiver = new PaperCoordinateGiver();
 		}
-
-		return new PaperCoordinateGiver();
+		return paperCoordinateGiver;
 	}
 
 	public void determineCoordinates(Paper root) {
 		if(calculated) return;
 
 		this.determineCoordinatesAlgo(root);
-//		root.setX(0);
-//		root.setY(0);
-		numY = 1f;
+		numY = 0.5f;
 	}
 
 	private void determineCoordinatesAlgo(Paper root) {
 		if(root.getReferences() == null || root.getReferences().size() == 0) {
-			root.setX(0f);
-			root.setY(0f);
-			root.setZ(0f);
+			root.setX(defaultX);
+			root.setY(defaultY);
+			root.setZ(defaultZ);
 			return;
 		}
 
@@ -49,8 +50,6 @@ public class PaperCoordinateGiver {
 		rootArr.add(root);
 
 		float smallestYear = (float) Math.min(determineX(rootArr), root.getPublishedPrint().getYear());
-//		float smallestYear = (float) root.getPublishedPrint().getYear();
-//		determineX(root.getReferences());
 		determineY(root);
 		determineZ(root);
 
@@ -71,13 +70,13 @@ public class PaperCoordinateGiver {
 	}
 
 	private Integer determineX(ArrayList<Paper> papers) {
-		// Smallest year is always root if there are no nodes to the left
+		// Smallest year is always root if there are no nodes to the left is invalid bc crossref D:
 		final int[] smallestYear = {LocalDate.now().getYear()};
 		if(papers == null) return smallestYear[0];
 
 		papers.forEach(paper -> {
 
-			if(paper.getTitle() == null || paper.getX() != null) {
+			if(paper.getTitle() == null) {
 				return;
 			}
 
@@ -103,34 +102,27 @@ public class PaperCoordinateGiver {
 	private void determineY(Paper root) {
 		if(root == null || root.getTitle() == null) return;
 
-//		ArrayList<Paper> papers = PaperService.flattenPapers(root);
+		determineYAlgo(root, defaultY);
+	}
+
+	private float determineYAlgo(Paper root, float height) {
+		if(root == null || root.getTitle() == null) return height;
 
 		ArrayList<Paper> sortedReferences = PaperService.sortReferencesByDecreasingYear(root);
 
+		float heightNew = height;
+		for(Paper paper : sortedReferences) {
+			heightNew = determineYAlgo(paper, heightNew);
+		}
 
-
-//		papers.stream().filter(paper -> paper.getTitle() != null &&
-//				(paper.getPublishedPrint() != null || paper.getPublishedOnline() != null) && paper.getY() == null)
-//				.forEach((Paper paper) -> {
-//			paper.setY(((float) numY));
-//			numY -= 0.5f;
-//		});
-	}
-
-	private float differenceBetweenNodes = -0.5f;
-
-	private float determineYAlgo(Paper root, float height) {
-		if(root == null || root.getTitle() == null) return height +  differenceBetweenNodes;
-
-
-
-
+		root.setY(height);
+		return heightNew + differenceBetweenNodesY;
 	}
 
 	private void determineZ(Paper root) {
 		if(root == null) return;
 
 		ArrayList<Paper> papers = PaperService.flattenPapers(root);
-		papers.forEach(paper -> paper.setZ(0f));
+		papers.forEach(paper -> paper.setZ(defaultZ));
 	}
 }

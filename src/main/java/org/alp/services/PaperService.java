@@ -51,7 +51,10 @@ public class PaperService {
 	}
 
 	public static ArrayList<Paper> sortReferencesByDecreasingYear(Paper root) {
-		return root.getReferences().stream().sorted(Comparator.comparingInt(Paper::getYear))
+		if(root == null || root.getReferences() == null) return new ArrayList<>();
+		return root.getReferences().stream()
+				.filter(paper -> paper.getPublishedOnline() != null || paper.getPublishedPrint() != null)
+				.sorted(Paper::compareTo)
 				.sorted(Collections.reverseOrder())
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
