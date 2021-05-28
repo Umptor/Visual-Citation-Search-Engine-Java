@@ -5,6 +5,7 @@ module org.alp {
     requires gs.core;
     requires java.net.http;
     requires com.google.gson;
+    requires gs.ui.javafx;
 
     opens org.alp to javafx.fxml;
 
