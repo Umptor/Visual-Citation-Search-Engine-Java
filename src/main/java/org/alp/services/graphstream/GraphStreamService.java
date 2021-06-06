@@ -38,74 +38,16 @@ public class GraphStreamService {
 	}
 
 	public void fillGraph(Paper paper, ArrayList<Paper> edges) {
-		this.addNode(paper, edges);
-		determineCoordinates();
+
 	}
 
 	public void determineCoordinates() {
-		PaperCoordinateGiver.initialize().determineCoordinates(rootPaper);
-
-
-		Stack<Paper> papers = new Stack<>();
-		papers.push(rootPaper);
-
-		while(!papers.isEmpty()) {
-			var current = papers.pop();
-			var node = this.graph.getNode(current.getDoi());
-			if(node == null) {
-				continue;
-			}
-//			current.setZ(0f);
-			if(current.getX() == null || current.getY() == null) {
-				System.out.println("wtf");
-				continue;
-			}
-			node.setAttribute("xyz", current.getX(), current.getY(), current.getZ());
-
-			if(current.getReferences() != null)
-				current.getReferences().stream()
-						.filter((Paper paper) -> Objects.nonNull(paper) && paper.getTitle() != null &&
-								(paper.getPublishedPrint() != null || paper.getPublishedOnline() != null))
-						.collect(Collectors.toList())
-						.forEach(papers::push);
-		}
 
 	}
 
-	private void addNode(Paper paper, ArrayList<Paper> edges) {
-		if(paper == null || paper.getTitle() == null) {
-			return;
-		}
-		var node = this.addNode(paper);
-		if(edges == null) {
-			return;
-		}
-
-		edges.stream().filter((Paper edge) -> edge.getTitle() != null).map(this::addNode).forEach(secondNode -> {
-			String newEdgeId = getEdgeId(node, secondNode);
-			if(graph.edges().noneMatch((Edge existingEdge) -> existingEdge.getId().equals(newEdgeId))) {
-				Edge edge = graph.addEdge(newEdgeId, node, secondNode, true);
-			}
-		});
+	private void addNode(Paper paper) {
 	}
 
-
-	private Node addNode(Paper paper) {
-		Node node = graph.nodes()
-				.filter((Node node2) -> node2.getId().equals(paper.getDoi()))
-				.findFirst().orElse(null);
-
-		if(node == null) {
-			node = graph.addNode(paper.getDoi());
-			if(root == null) {
-				this.setRoot(node);
-				this.rootPaper = paper;
-			}
-			node.setAttribute("ui.label", "" + paper.getTitle());
-		}
-
-		return node;
-	}
 
 	private void setRoot(Node root) {
 		this.root = root;
@@ -149,31 +91,7 @@ public class GraphStreamService {
 		System.out.println(selectedPaper.getX() + " " + selectedPaper.getY() + " " + selectedPaper.getZ());
 
 		// Get Nodes around initialNode
-		Paper paper = null;
-		boolean success = false;
-		try {
-			paper = CrossRefService.getMetadata(selectedPaper);
-			var references = CrossRefService.getRelatedPapers(paper, 1, true);
-			paper.setReferences(references);
-			success = true;
-		} catch(URISyntaxException | InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		if(!success) return;
-
-
-		this.reset();
-
-		this.fillGraph(paper, paper.getReferences());
-
 	}
-
-//	private final Graph graph = new SingleGraph("Citation Graph");
-//	private final Viewer viewer;
-//	private final PaperTreeViewerListener listener;
-//	private Node root = null;
-//	private Paper rootPaper = null;
 
 	private void reset() {
 		while(this.graph.getNodeCount() > 0) {
