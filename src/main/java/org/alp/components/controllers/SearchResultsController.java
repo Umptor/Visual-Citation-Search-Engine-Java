@@ -106,7 +106,7 @@ public class SearchResultsController {
 		}
 		assert selected != null;
 
-		CrossRefService.getRelatedPapers(selected, 2);
+		CrossRefService.getRelatedPapers(selected, 1, false);
 
 		graph.fillGraph(selected, selected.getReferences());
 	}

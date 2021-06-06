@@ -164,4 +164,12 @@ public class Paper implements Comparable<Paper> {
 		if(!this.getMonth().equals(paper.getMonth())) return Integer.compare(this.getMonth(), paper.getMonth());
 		return Integer.compare(this.getDay(), paper.getDay());
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof Paper)) return false;
+
+		Paper another = (Paper) obj;
+		return this.doi.equals(another.getDoi());
+	}
 }

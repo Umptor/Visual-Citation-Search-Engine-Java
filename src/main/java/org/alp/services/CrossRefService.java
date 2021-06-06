@@ -43,10 +43,23 @@ public class CrossRefService {
 				.getMessage()
 				.getItems();
 
-		return Arrays.stream(items).map(CrossRefService::mapItemToPaper).collect(Collectors.toCollection(ArrayList::new));
+		var ret = Arrays.stream(items).map(CrossRefService::mapItemToPaper).collect(Collectors.toCollection(ArrayList::new));
+		ret.forEach(CrossRefService::fixPaperReferences);
+		return ret;
 	}
 
-	public static CompletableFuture<HttpResponse<String>> getMetadataFromDoi(String doi) throws URISyntaxException {
+	public static Paper getMetadata(Paper paper) throws URISyntaxException {
+		var response = getMetadata(paper.getDoi());
+
+		var responseArr = new ArrayList<CompletableFuture<HttpResponse<String>>>();
+		responseArr.add(response);
+
+		var ret = mapMetadataResponsesToObjects(responseArr).get(0);
+		fixPaperReferences(ret);
+
+		return ret;
+	}
+	private static CompletableFuture<HttpResponse<String>> getMetadata(String doi) throws URISyntaxException {
 		var httpClient = HttpClient.newHttpClient();
 		String urlString = crossRefUrl + "works/" + URLEncoder.encode(doi, StandardCharsets.UTF_8);
 		urlString = ParamBuilder.addParam(urlString, "mailto", "e160503134@stud.tau.edu.tr");
@@ -56,7 +69,6 @@ public class CrossRefService {
 		var httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
 
 		return httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
-
 	}
 
 	private static Paper mapItemToPaper(Item item) {
@@ -82,33 +94,53 @@ public class CrossRefService {
 	}
 
 
-
-	public static ArrayList<Paper> getRelatedPapers(Paper paper, int depth) throws URISyntaxException, InterruptedException {
-
-		return getConnections(paper, depth);
+	/**
+	 *
+	 * @param paper - References of "paper" will be gotten
+	 * @param depth - How many levels deep the references array should be
+	 * @param regetReferences - Should the initial references array be regotten
+	 * @return - Only used when regetReferences = true, need to manually set the papers references
+	 * @throws URISyntaxException - An error with the url, my fault
+	 * @throws InterruptedException - An error with the server, my fault
+	 *
+	 */
+	public static ArrayList<Paper> getRelatedPapers(Paper paper, int depth, boolean regetReferences) throws URISyntaxException, InterruptedException {
+		ArrayList<Paper> ret;
+		if(regetReferences) {
+			Paper newPaper = getMetadata(paper);
+			ret = getConnections(newPaper, depth);
+			paper.setReferences(ret);
+		} else {
+			ret = getConnections(paper, depth);
+		}
+		fixPaperReferences(paper);
+		return ret;
 	}
 
 	private static ArrayList<Paper> getConnections(Paper paper, int depth) throws URISyntaxException, InterruptedException {
 		// TODO: Only get depth amount of references
 		ArrayList<Paper> references = new ArrayList<>();
+		ArrayList<Paper> existingReferences = new ArrayList<>();
 		ArrayList<CompletableFuture<HttpResponse<String>>> responses = new ArrayList<>();
 
 		if(paper.getReferences() != null && depth > 0) {
 			for(int i = 0; i < paper.getReferences().size(); i++) {
+				String title = paper.getReferences().get(i).getTitle();
+				if(title != null && !title.equals("")) {
+					existingReferences.add(paper.getReferences().get(i));
+				}
+
 				// Wait 1 second between every 20 requests because of the limit on CrossRef's Api. Even though the limit
 				// is 50 requests per second, when I set this to 20+ I get errors
 				if(responses.size() % 20 == 0 && responses.size() != 0) {
 					TimeUnit.SECONDS.sleep(1);
 				}
-				responses.add(getMetadataFromDoi(paper.getReferences().get(i).getDoi()));
+				responses.add(getMetadata(paper.getReferences().get(i).getDoi()));
 			}
 
 			// Join response, then map item to paper and add into references
-			references = responses.stream()
-					.map(response -> mapItemToPaper(
-							jsonMapperToBody(response.join().body(), GetMetadataResponse.class).getMessage()))
-					.filter((Paper reference) -> reference.getTitle() != null || !reference.getTitle().equals(""))
-					.collect(Collectors.toCollection(ArrayList::new));
+			references = mapMetadataResponsesToObjects(responses);
+			references.addAll(existingReferences);
 
 			for(Paper reference : references) {
 				paper.setReferences(references);
@@ -117,6 +149,14 @@ public class CrossRefService {
 		}
 
 		return references;
+	}
+
+	private static ArrayList<Paper> mapMetadataResponsesToObjects(ArrayList<CompletableFuture<HttpResponse<String>>> responses) {
+		return responses.stream()
+				.map(response -> mapItemToPaper(
+						jsonMapperToBody(response.join().body(), GetMetadataResponse.class).getMessage()))
+				.filter((Paper reference) -> reference.getTitle() != null || !reference.getTitle().equals(""))
+				.collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	private static <T> T jsonMapperToBody(String str, Class<T> classOfT) {
@@ -130,6 +170,32 @@ public class CrossRefService {
 			System.out.println(exception.toString());
 		}
 		return returnValue;
+	}
+
+	private static void fixPaperReferences(Paper root) {
+		fixPaperReferencesAlgo(root, new ArrayList<>());
+	}
+
+	private static void fixPaperReferencesAlgo(Paper root, ArrayList<Paper> visited) {
+		if(visited.contains(root) || root.getReferences() == null) {
+			return;
+		}
+
+		ArrayList<Paper> references = root.getReferences();
+
+		references.forEach(reference -> {
+			visited.add(reference);
+
+			if(reference.getReferences() == null) {
+				reference.setReferences(new ArrayList<>());
+			}
+
+			if(reference.getReferences().contains(root)) return;
+
+			reference.getReferences().add(root);
+
+			fixPaperReferencesAlgo(reference, visited);
+		});
 	}
 
 	public static Paper findPaper(Paper rootPaper, String doiToFind) {

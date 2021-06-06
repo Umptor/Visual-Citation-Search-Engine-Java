@@ -1,12 +1,9 @@
 package org.alp.services;
 
 import org.alp.models.Paper;
-import org.alp.models.crossrefApi.getWorksResponse.GetWorksResponse;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PaperService {
 	private static ArrayList<Paper> papers = null;
@@ -25,16 +22,17 @@ public class PaperService {
 	}
 
 	public static ArrayList<Paper> flattenPapers(Paper root) {
-		var papers = flattenPapersAlgo(root);
+		var papers = flattenPapersAlgo(root, new ArrayList<>());
 
 		return papers.stream().distinct().collect(Collectors.toCollection(ArrayList::new));
 	}
 
-	private static ArrayList<Paper> flattenPapersAlgo(Paper root) {
+	private static ArrayList<Paper> flattenPapersAlgo(Paper root, ArrayList<Paper> visited) {
 		ArrayList<Paper> papers = new ArrayList<>();
-		if(root == null) {
+		if(root == null || visited.contains(root)) {
 			return papers;
 		}
+		visited.add(root);
 
 		papers.add(root);
 
@@ -43,19 +41,36 @@ public class PaperService {
 		}
 
 		root.getReferences().forEach(paper -> {
-			var newPapers = flattenPapers(paper);
+			var newPapers = flattenPapersAlgo(paper, visited);
 			papers.addAll(newPapers);
 		});
 
 		return papers;
 	}
 
-	public static ArrayList<Paper> sortReferencesByDecreasingYear(Paper root) {
+	public static ArrayList<Paper> sortReferencesByIncreasingYear(Paper root) {
 		if(root == null || root.getReferences() == null) return new ArrayList<>();
 		return root.getReferences().stream()
 				.filter(paper -> paper.getPublishedOnline() != null || paper.getPublishedPrint() != null)
 				.sorted(Paper::compareTo)
-				.sorted(Collections.reverseOrder())
 				.collect(Collectors.toCollection(ArrayList::new));
+	}
+
+	public static ArrayList<Paper> sortReferencesByDecreasingYear(Paper root) {
+		var a = sortReferencesByIncreasingYear(root);
+		Collections.reverse(a);
+		return a;
+	}
+
+	public static ArrayList<Paper> sortPapersByIncreasingYear(ArrayList<Paper> papers) {
+		return papers.stream().filter(paper -> paper.getPublishedOnline() != null || paper.getPublishedPrint() != null)
+				.sorted(Paper::compareTo)
+				.collect(Collectors.toCollection(ArrayList::new));
+	}
+
+	public static ArrayList<Paper> sortPapersByDecreasingYear(ArrayList<Paper> papers) {
+		var a = sortPapersByIncreasingYear(papers);
+		Collections.reverse(a);
+		return a;
 	}
 }

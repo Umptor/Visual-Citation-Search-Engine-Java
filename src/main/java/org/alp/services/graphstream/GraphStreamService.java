@@ -9,6 +9,7 @@ import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.view.Viewer;
 
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Stack;
@@ -43,6 +44,8 @@ public class GraphStreamService {
 
 	public void determineCoordinates() {
 		PaperCoordinateGiver.initialize().determineCoordinates(rootPaper);
+
+
 		Stack<Paper> papers = new Stack<>();
 		papers.push(rootPaper);
 
@@ -55,6 +58,7 @@ public class GraphStreamService {
 //			current.setZ(0f);
 			if(current.getX() == null || current.getY() == null) {
 				System.out.println("wtf");
+				continue;
 			}
 			node.setAttribute("xyz", current.getX(), current.getY(), current.getZ());
 
@@ -80,11 +84,9 @@ public class GraphStreamService {
 		edges.stream().filter((Paper edge) -> edge.getTitle() != null).map(this::addNode).forEach(secondNode -> {
 			String newEdgeId = getEdgeId(node, secondNode);
 			if(graph.edges().noneMatch((Edge existingEdge) -> existingEdge.getId().equals(newEdgeId))) {
-				Edge edge = graph.addEdge(newEdgeId, node, secondNode);
-				edge.setAttribute("isDirected", true);
+				Edge edge = graph.addEdge(newEdgeId, node, secondNode, true);
 			}
 		});
-		paper.getReferences().forEach((Paper reference) -> addNode(reference, reference.getReferences()));
 	}
 
 
@@ -145,6 +147,40 @@ public class GraphStreamService {
 		System.out.println(selectedPaper.getDay() + "/" + selectedPaper.getMonth() + "/" + selectedPaper.getYear());
 
 		System.out.println(selectedPaper.getX() + " " + selectedPaper.getY() + " " + selectedPaper.getZ());
+
+		// Get Nodes around initialNode
+		Paper paper = null;
+		boolean success = false;
+		try {
+			paper = CrossRefService.getMetadata(selectedPaper);
+			var references = CrossRefService.getRelatedPapers(paper, 1, true);
+			paper.setReferences(references);
+			success = true;
+		} catch(URISyntaxException | InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		if(!success) return;
+
+
+		this.reset();
+
+		this.fillGraph(paper, paper.getReferences());
+
 	}
 
+//	private final Graph graph = new SingleGraph("Citation Graph");
+//	private final Viewer viewer;
+//	private final PaperTreeViewerListener listener;
+//	private Node root = null;
+//	private Paper rootPaper = null;
+
+	private void reset() {
+		while(this.graph.getNodeCount() > 0) {
+			this.graph.removeNode(0);
+		}
+		while(this.graph.getEdgeCount() > 0) {
+			this.graph.removeEdge(0);
+		}
+	}
 }
