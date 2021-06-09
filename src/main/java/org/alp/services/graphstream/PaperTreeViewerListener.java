@@ -24,7 +24,7 @@ public class PaperTreeViewerListener implements ViewerListener {
 
 	private double startX = 0.0;
 	private double startY = 0.0;
-	private double minDistanceForDrag = 2.0;
+	private final double minDistanceForDrag = 2.0;
 	private boolean cursorNormal = true;
 
 	public PaperTreeViewerListener(GraphStreamService graphStreamService, Graph graph, Viewer viewer) {
@@ -68,11 +68,16 @@ public class PaperTreeViewerListener implements ViewerListener {
 
 	@Override
 	public void buttonReleased(String id) {
+		Point3 newCenter;
 		if(pushedId.equals(id)) {
-			graphStreamService.selectNode(id);
+			newCenter = graphStreamService.selectNode(id);
 		} else {
 			System.out.println("Make up your mind and select something");
+			return;
 		}
+
+		Camera cam = view.getCamera();
+		cam.setViewCenter(newCenter.x, newCenter.y, newCenter.z);
 	}
 
 	@Override

@@ -35,8 +35,14 @@ public class Item {
 	@SerializedName("published-online")
 	private PublishTime publishedOnline;
 
+	@SerializedName("journal-title")
+	private String journalTitle;
+
+	@SerializedName("unstructured")
+	private String unstructured;
+
 	public Item(int referenceCount, String doi, String isReferencedByCount, String[] title, String[] containerTitle,
-	            Author[] authors, float score, Reference[] references, String paperAbstract, PublishTime publishedPrint, PublishTime publishedOnline) {
+	            Author[] authors, float score, Reference[] references, String paperAbstract, PublishTime publishedPrint, PublishTime publishedOnline, String journalTitle, String unstructured) {
 		this.referenceCount = referenceCount;
 		this.doi = doi;
 		this.isReferencedByCount = isReferencedByCount;
@@ -48,6 +54,8 @@ public class Item {
 		this.paperAbstract = paperAbstract;
 		this.publishedPrint = publishedPrint;
 		this.publishedOnline = publishedOnline;
+		this.journalTitle = journalTitle;
+		this.unstructured = unstructured;
 	}
 
 	public int getReferenceCount() {
@@ -136,6 +144,22 @@ public class Item {
 
 	public void setPublishedOnline(PublishTime publishedOnline) {
 		this.publishedOnline = publishedOnline;
+	}
+
+	public String getJournalTitle() {
+		return journalTitle;
+	}
+
+	public void setJournalTitle(String journalTitle) {
+		this.journalTitle = journalTitle;
+	}
+
+	public String getUnstructured() {
+		return unstructured;
+	}
+
+	public void setUnstructured(String unstructured) {
+		this.unstructured = unstructured;
 	}
 
 	/* Logic Starts Here */

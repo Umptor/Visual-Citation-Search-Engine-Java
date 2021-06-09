@@ -4,17 +4,10 @@ import org.alp.models.Paper;
 import org.alp.services.DateService;
 import org.alp.services.PaperService;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Stack;
-import java.util.stream.Collectors;
 
 public class PaperCoordinateGiver {
 	private static PaperCoordinateGiver paperCoordinateGiver;
-	private static float numY = 1;
-
-	private boolean calculated = false;
 
 	private final float defaultX = 0;
 	private final float defaultY = 0;
@@ -32,10 +25,7 @@ public class PaperCoordinateGiver {
 	}
 
 	public void determineCoordinates(Paper root) {
-		if(calculated) return;
-
 		this.determineCoordinatesAlgo(root);
-		numY = 0.5f;
 	}
 
 	private void determineCoordinatesAlgo(Paper root) {
@@ -46,35 +36,71 @@ public class PaperCoordinateGiver {
 			return;
 		}
 
-		ArrayList<Paper> rootArr = new ArrayList<>();
-		rootArr.add(root);
 
-		float smallestYear = (float) Math.min(determineX(rootArr, new ArrayList<>()), root.getPublishedPrint().getYear());
+		determineX(root);
 		determineY(root);
 		determineZ(root);
-
-		// Normalize X
-
 	}
 
-	private Paper root;
+	private void determineX(Paper root) {
+		ArrayList<Paper> papers = new ArrayList<>();
+		papers.add(root);
+		papers.addAll(root.getReferences());
 
-	private Integer determineX(ArrayList<Paper> papers, ArrayList<Paper> visited) {
+		papers.forEach(paper -> {
+			int daysInYear = DateService.daysInYear(paper.getDate());
+			int daysSinceBeginningOfYear = DateService.daysSinceBeginningOfYear(paper.getDate());
 
+			paper.setX((float) paper.getYear() + (float) daysSinceBeginningOfYear/(float) daysInYear);
+		});
+
+		normalizeX(root, papers);
+	}
+
+	private void normalizeX(Paper root, ArrayList<Paper> papers) {
+		papers.forEach(reference -> reference.setX(reference.getX() - root.getYear()));
 	}
 
 	private void determineY(Paper root) {
+		root.setY(defaultY);
 
+		ArrayList<Paper> left = new ArrayList<>();
+		ArrayList<Paper> right = new ArrayList<>();
+		float heightLeft = defaultY + differenceBetweenNodesY;
+		float heightRight = defaultY + differenceBetweenNodesY;
+
+		for(Paper paper : root.getReferences()) {
+			if(paper.compareTo(root) > 0) {
+				left.add(paper);
+			}
+			else {
+				right.add(paper);
+			}
+		}
+
+		left = PaperService.sortPapersByIncreasingYear(left);
+		determineYAlgo(left, heightLeft);
+
+		right = PaperService.sortPapersByDecreasingYear(right);
+		determineYAlgo(right, heightRight);
 	}
 
-	private void determineYAlgo(Paper root, float height) {
-
+	private void determineYAlgo(ArrayList<Paper> references, float height) {
+		int counter = 0;
+		for(Paper paper : references) {
+			if(counter++ % 2 == 0) {
+				paper.setY(height);
+				height += differenceBetweenNodesY;
+			}
+			else {
+				paper.setY(height * -1);
+			}
+		}
 	}
 
 	private void determineZ(Paper root) {
-		if(root == null) return;
+		root.setZ(defaultZ);
 
-		ArrayList<Paper> papers = PaperService.flattenPapers(root);
-		papers.forEach(paper -> paper.setZ(defaultZ));
+		root.getReferences().forEach(paper -> paper.setZ(defaultZ));
 	}
 }

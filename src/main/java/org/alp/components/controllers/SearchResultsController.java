@@ -7,14 +7,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseEvent;
 import org.alp.models.Paper;
 import org.alp.models.PaperTableElement;
 import org.alp.services.CrossRefService;
 import org.alp.services.graphstream.GraphStreamService;
 import org.alp.services.PaperService;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 
@@ -86,7 +84,7 @@ public class SearchResultsController {
 		resultsTable.getColumns().addAll(titleColumn, authorColumn, referenceCountColumn);
 	}
 
-	public void onShowButtonMouseClick(MouseEvent mouseEvent) throws URISyntaxException, InterruptedException {
+	public void onShowButtonMouseClick() {
 		System.out.println("clicked show button\nGood Luck, this might take a while");
 		if(this.selectedPaper == null) {
 			System.out.println("No Paper selected");
@@ -106,8 +104,8 @@ public class SearchResultsController {
 		}
 		assert selected != null;
 
-		CrossRefService.getRelatedPapers(selected, 1, false);
+		Paper root = CrossRefService.getFullReferences(selected, null);
 
-		graph.fillGraph(selected, selected.getReferences());
+		graph.showGraph(root);
 	}
 }
