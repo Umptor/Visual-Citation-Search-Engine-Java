@@ -3,7 +3,9 @@ package org.alp.models;
 import org.alp.models.crossrefApi.Author;
 import org.alp.models.crossrefApi.PublishTime;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class Paper implements Comparable<Paper> {
 
@@ -34,6 +36,10 @@ public class Paper implements Comparable<Paper> {
 		this.publishedOnline = publishedOnline;
 		this.formatAbstract();
 		this.publishedPrint = publishedPrint;
+	}
+
+	public Paper(String doi) {
+		this.doi = doi;
 	}
 
 	public Paper() {}
@@ -125,6 +131,32 @@ public class Paper implements Comparable<Paper> {
 		this.publishedOnline = publishedOnline;
 	}
 
+
+
+
+	/* Fix references methods */
+	public void fixReferences(boolean removeReferencesWithoutDates) {
+		if(this.references == null) return;
+
+		this.doBackwardsReferences();
+		this.removeEmpties(removeReferencesWithoutDates);
+	}
+
+	private void doBackwardsReferences() {
+		this.references.forEach(reference -> {
+			if(reference.getReferences() == null)
+				reference.setReferences(new ArrayList<>());
+			reference.getReferences().add(this);
+		});
+	}
+
+	public void removeEmpties(boolean removeReferencesWithoutDates) {
+		this.references = this.references.stream()
+				.filter(reference -> reference.getDoi() != null && !reference.getDoi().equals("") &&
+						(reference.getPublishedOnline() != null || reference.getPublishedPrint() != null || !removeReferencesWithoutDates))
+				.collect(Collectors.toCollection(ArrayList::new));
+	}
+
 	/* Logic Starts Here */
 	public Integer getYear() {
 		Integer printYear = publishedPrint  == null ? null : publishedPrint.getYear();
@@ -144,6 +176,14 @@ public class Paper implements Comparable<Paper> {
 		Integer onlineDay = publishedOnline == null ? null : publishedOnline.getDay();
 		Integer day = returnMinDate(printDay, onlineDay);
 		return day == null ? PublishTime.DEFAULT_DAY : null;
+	}
+
+	public LocalDate getDate() {
+		return LocalDate.of(
+				this.getYear(),
+				this.getMonth(),
+				this.getDay()
+		);
 	}
 
 	private Integer returnMinDate(Integer printDate, Integer onlineDate) {
@@ -167,9 +207,16 @@ public class Paper implements Comparable<Paper> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(!(obj instanceof Paper)) return false;
+		if((obj instanceof Paper)) {
+			Paper another = (Paper) obj;
+			return this.doi.equals(another.getDoi());
+		}
 
-		Paper another = (Paper) obj;
-		return this.doi.equals(another.getDoi());
+		if(obj instanceof String) {
+			String doi = (String) obj;
+			return this.doi.equals(doi);
+		}
+
+		return false;
 	}
 }

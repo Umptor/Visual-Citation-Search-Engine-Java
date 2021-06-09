@@ -32,7 +32,7 @@ public class HomepageController {
 		System.out.println("Initialized Homepage");
 	}
 
-	public void searchButtonOnClick(ActionEvent actionEvent) throws InterruptedException, IOException, URISyntaxException {
+	public void searchButtonOnClick() throws InterruptedException, IOException, URISyntaxException {
 		ArrayList<Paper> papers = CrossRefService.getPaperByKeyWord(searchTextField.getText());
 		PaperService.setPapers(papers);
 		App.setRoot("searchResults");
