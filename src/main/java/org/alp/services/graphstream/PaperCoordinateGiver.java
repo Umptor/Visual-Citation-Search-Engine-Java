@@ -70,7 +70,7 @@ public class PaperCoordinateGiver {
 		float heightRight = defaultY + differenceBetweenNodesY;
 
 		for(Paper paper : root.getReferences()) {
-			if(paper.compareTo(root) > 0) {
+			if(paper.compareTo(root) <= 0) {
 				left.add(paper);
 			}
 			else {
