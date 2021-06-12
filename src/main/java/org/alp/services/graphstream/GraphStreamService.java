@@ -56,8 +56,9 @@ public class GraphStreamService {
 			this.setRoot(node);
 			this.rootPaper = paper;
 		}
+		String label = paper.getTitle().substring(0, Math.min(paper.getTitle().length(), 50));
 
-		node.setAttribute("ui.label", "" + paper.getTitle());
+		node.setAttribute("ui.label", "" + label);
 		node.setAttribute("xyz", paper.getX(), paper.getY(), paper.getZ());
 	}
 
@@ -119,6 +120,19 @@ public class GraphStreamService {
 
 		return getNewRoot(selectedPaper, rootPaper);
 	}
+
+	public void printXAndY(String doi) {
+		Node node = graph.getNode(doi);
+
+		Paper selectedPaper = CrossRefService.findPaper(rootPaper, doi);
+		System.out.println("X from GraphStream = " + selectedPaper.getX());
+		System.out.println("Y from GraphStream = " + selectedPaper.getY());
+	}
+
+	public Paper getPaper(String doi) {
+		return CrossRefService.findPaper(rootPaper, doi);
+	}
+
 
 	private Point3 getNewRoot(Paper newRoot, Paper oldRoot) {
 		// Get Nodes around initialNode
