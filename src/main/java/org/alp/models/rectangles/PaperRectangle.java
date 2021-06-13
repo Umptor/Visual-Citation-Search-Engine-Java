@@ -5,28 +5,35 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import org.alp.models.Paper;
+import org.alp.services.CrossRefService;
+import org.alp.services.drawer.GraphDrawer;
 
 public class PaperRectangle extends Rectangle {
 
 	Paper paper;
+	private final GraphDrawer graphDrawer;
 
-	public PaperRectangle(Paper paper) {
+	public PaperRectangle(Paper paper, GraphDrawer graphDrawer) {
 		this.paper = paper;
+		this.graphDrawer = graphDrawer;
 	}
 
-	public PaperRectangle(Paper paper, double width, double height) {
+	public PaperRectangle(Paper paper, double width, double height, GraphDrawer graphDrawer) {
 		super(width, height);
 		this.paper = paper;
+		this.graphDrawer = graphDrawer;
 	}
 
-	public PaperRectangle(Paper paper, double width, double height, Paint paint) {
+	public PaperRectangle(Paper paper, double width, double height, Paint paint, GraphDrawer graphDrawer) {
 		super(width, height, paint);
 		this.paper = paper;
+		this.graphDrawer = graphDrawer;
 	}
 
-	public PaperRectangle(Paper paper, double x, double y, double width, double height) {
+	public PaperRectangle(Paper paper, double x, double y, double width, double height, GraphDrawer graphDrawer) {
 		super(x, y, width, height);
 		this.paper = paper;
+		this.graphDrawer = graphDrawer;
 	}
 
 	public Paper getPaper() {
@@ -71,20 +78,31 @@ public class PaperRectangle extends Rectangle {
 		return edgeCoords;
 	}
 
-	public static void onMouseDownOnPaper(MouseEvent mouseEvent) {
+	public void onMouseDownOnPaper(MouseEvent mouseEvent) {
 		PaperRectangle paperRectangle = (PaperRectangle) mouseEvent.getSource();
 
-		onMouseDownOnPaper(paperRectangle);
+		onMouseDownOnPaper();
 	}
 
-	protected static void onMouseDownOnPaper(PaperRectangle paperRectangle) {
-		System.out.println("Paper: " + paperRectangle.getPaper().getTitle());
-		System.out.println("x: " + paperRectangle.getX() + " y: " + paperRectangle.getY());
-		System.out.println("time: " + paperRectangle.getPaper().getYear() + " " + paperRectangle.getPaper().getMonth() + " " + paperRectangle.getPaper().getDay());
-		System.out.println(paperRectangle.getPaper().getTitle());
+	protected void onMouseDownOnPaper() {
+		this.printInformationToConsole();
+		this.changeRootNode();
 	}
 
-	public static void setColor(PaperRectangle paperRectangle, Color color) {
-		paperRectangle.setFill(color);
+	private void printInformationToConsole() {
+		System.out.println("Paper: " + this.getPaper().getTitle());
+		System.out.println("x: " + this.getX() + " y: " + this.getY());
+		System.out.println("time: " + this.getPaper().getYear() + " " + this.getPaper().getMonth() + " " + this.getPaper().getDay());
+		System.out.println(this.getPaper().getTitle());
+	}
+
+	private void changeRootNode() {
+		Paper root = graphDrawer.getRoot().getPaper();
+		this.paper = CrossRefService.getFullReferences(this.paper, root);
+		graphDrawer.drawGraph(this.getPaper());
+	}
+
+	public void setColor(Color color) {
+		this.setFill(color);
 	}
 }

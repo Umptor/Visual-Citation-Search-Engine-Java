@@ -24,8 +24,8 @@ public class PaperText extends Text {
 		this.paperRectangle = paperRectangle;
 	}
 
-	public static void onMouseDownOnText(MouseEvent mouseEvent) {
+	public void onMouseDownOnText(MouseEvent mouseEvent) {
 		PaperText paperText = (PaperText) mouseEvent.getSource();
-		PaperRectangle.onMouseDownOnPaper(paperText.getPaperRectangle());
+		paperText.getPaperRectangle().onMouseDownOnPaper();
 	}
 }

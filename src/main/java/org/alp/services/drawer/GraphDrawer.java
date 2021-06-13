@@ -26,7 +26,7 @@ public class GraphDrawer {
 	private final Pane graphPane;
 	private final PaperCoordinateGiver coordinateGiver = PaperCoordinateGiver.initialize();
 
-	private final Map<String, ArrayList<PaperRectangle>> nodesFromEdgeId = new HashMap<>();
+	private final Map<String, ArrayList<PaperRectangle>> nodesFromEdgeIdMap = new HashMap<>();
 	private final Map<String, Line> lineFromEdgeIdMap = new HashMap<>();
 	private final ArrayList<PaperRectangle> papers = new ArrayList<>();
 
@@ -91,7 +91,7 @@ public class GraphDrawer {
 
 		List<PaperRectangle> paperRectangles = papers.stream()
 				.filter(Objects::nonNull).filter(paper -> paper.getTitle() != null)
-				.map(paper -> new PaperRectangle(paper, paper.getX(), paper.getY(), width, height))
+				.map(paper -> new PaperRectangle(paper, paper.getX(), paper.getY(), width, height, this))
 				.collect(Collectors.toList());
 
 		paperRectangles.forEach(this::drawNode);
@@ -118,8 +118,8 @@ public class GraphDrawer {
 
 		graphPane.getChildren().add(stack);
 
-		paper.addEventHandler(MouseEvent.MOUSE_PRESSED, PaperRectangle::onMouseDownOnPaper);
-		text.addEventHandler(MouseEvent.MOUSE_PRESSED, PaperText::onMouseDownOnText);
+		paper.addEventHandler(MouseEvent.MOUSE_PRESSED, paper::onMouseDownOnPaper);
+		text.addEventHandler(MouseEvent.MOUSE_PRESSED, text::onMouseDownOnText);
 	}
 
 	private void reset() {
@@ -133,6 +133,8 @@ public class GraphDrawer {
 		if(this.drawNodes != null) drawNodes.clear();
 		this.papers.clear();
 		this.root = null;
+		this.nodesFromEdgeIdMap.clear();
+		this.lineFromEdgeIdMap.clear();
 	}
 
 
@@ -273,7 +275,7 @@ public class GraphDrawer {
 			Color color = calculateColor(paper.getPaper(), colorCuttoffs);
 			PaperRectangle paperRectangle = this.getPaperRectangle(paper.getPaper());
 			assert paperRectangle != null;
-			PaperRectangle.setColor(paperRectangle, color);
+			paperRectangle.setColor(color);
 		});
 	}
 
@@ -299,15 +301,7 @@ public class GraphDrawer {
 		return color;
 	}
 
-	private PaperRectangle getPaperRectangle(Paper paper) {
-		for(PaperRectangle paperRectangle : this.papers) {
-			if(paperRectangle.getPaper().getDoi().equals(paper.getDoi())) {
-				return paperRectangle;
-			}
-		}
-		return null;
-	}
-
+	//region Edge Methods
 	private void drawEdges(PaperRectangle root) {
 		ArrayList<PaperRectangle> papers = this.papers.stream()
 				.filter(paper -> !paper.equals(root))
@@ -338,7 +332,7 @@ public class GraphDrawer {
 		edgeNodes.add(start);
 		edgeNodes.add(end);
 
-		this.nodesFromEdgeId.put(edgeId, edgeNodes);
+		this.nodesFromEdgeIdMap.put(edgeId, edgeNodes);
 
 		Line line = new Line();
 		line.setStartX(startCoords[0]);
@@ -357,5 +351,19 @@ public class GraphDrawer {
 
 	private String getEdgeId(PaperRectangle start, PaperRectangle end) {
 		return start.getPaper().getDoi() + end.getPaper().getDoi();
+	}
+	//endregion
+
+	private PaperRectangle getPaperRectangle(Paper paper) {
+		for(PaperRectangle paperRectangle : this.papers) {
+			if(paperRectangle.getPaper().getDoi().equals(paper.getDoi())) {
+				return paperRectangle;
+			}
+		}
+		return null;
+	}
+
+	public PaperRectangle getRoot() {
+		return root;
 	}
 }
