@@ -78,6 +78,7 @@ public class PaperRectangle extends Rectangle {
 	}
 
 	protected static void onMouseDownOnPaper(PaperRectangle paperRectangle) {
+		System.out.println("Paper: " + paperRectangle.getPaper().getTitle());
 		System.out.println("x: " + paperRectangle.getX() + " y: " + paperRectangle.getY());
 		System.out.println("time: " + paperRectangle.getPaper().getYear() + " " + paperRectangle.getPaper().getMonth() + " " + paperRectangle.getPaper().getDay());
 		System.out.println(paperRectangle.getPaper().getTitle());

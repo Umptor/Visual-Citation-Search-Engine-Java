@@ -13,7 +13,7 @@ public class PaperCoordinateGiver {
 	private final float defaultX = 0;
 	private final float defaultY = 0;
 	private final float defaultZ = 0;
-	private final float differenceBetweenNodesY = (float) -GraphDrawer.height;
+	private final float differenceBetweenNodesY = (float) -(GraphDrawer.height + 40);
 
 
 	private PaperCoordinateGiver() {}

@@ -6,6 +6,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -34,9 +35,10 @@ public class GraphDrawer {
 	public static double height = 100.0;
 	public static double width = 300.0;
 
+	private final double minDistanceForDrag = 2.0;
+	private final double deltaZoom = 0.95d;
 	private double dragStartX = 0.0;
 	private double dragStartY = 0.0;
-	private final double minDistanceForDrag = 2.0;
 	private boolean cursorNormal = true;
 
 	private ContextMenu contextMenu;
@@ -66,6 +68,7 @@ public class GraphDrawer {
 		this.graphPane.addEventHandler(MouseDragEvent.MOUSE_PRESSED, this::onMouseDown);
 		this.graphPane.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::onMouseDrag);
 		this.graphPane.addEventHandler(MouseEvent.MOUSE_RELEASED, this::onMouseUp);
+		this.graphPane.addEventHandler(ScrollEvent.ANY, this::onMouseScroll);
 	}
 
 	private void setupContextMenu() {
@@ -132,9 +135,9 @@ public class GraphDrawer {
 		this.root = null;
 	}
 
+
+	//region Mouse Click Events
 	public void onMouseDown(MouseEvent mouseEvent) {
-		System.out.println(mouseEvent.getX());
-		System.out.println(mouseEvent.getY());
 		switch(mouseEvent.getButton()) {
 			case PRIMARY: {
 				this.contextMenu.hide();
@@ -154,7 +157,30 @@ public class GraphDrawer {
 		App.getScene().setCursor(Cursor.DEFAULT);
 		cursorNormal = true;
 	}
+	//endregion
 
+	//region Mouse Scroll Events
+	private void onMouseScroll(ScrollEvent scrollEvent) {
+		double scaleX = graphPane.getScaleX();
+		double scaleY = graphPane.getScaleY();
+
+		if(scrollEvent.getDeltaY() > 0) {
+			scaleX /= this.deltaZoom;
+			scaleY /= this.deltaZoom;
+		} else if(scrollEvent.getDeltaY() != 0){
+			scaleX *= this.deltaZoom;
+			scaleY *= this.deltaZoom;
+		} else {
+			return;
+		}
+
+		graphPane.setScaleX(scaleX);
+		graphPane.setScaleY(scaleY);
+	}
+	//endregion
+
+
+	//region Mouse Drag Events
 	public void onMouseDrag(MouseEvent mouseEvent) {
 		if(!mouseEvent.isPrimaryButtonDown()) return;
 		if(cursorNormal) App.getScene().setCursor(Cursor.CLOSED_HAND);
@@ -227,6 +253,7 @@ public class GraphDrawer {
 				Math.abs(distanceY) > minDistanceForDrag ||
 				Math.abs(distanceX + distanceY) > minDistanceForDrag;
 	}
+	//endregion
 
 	private void colorNodes(PaperRectangle root) {
 		int min = Integer.MAX_VALUE;
