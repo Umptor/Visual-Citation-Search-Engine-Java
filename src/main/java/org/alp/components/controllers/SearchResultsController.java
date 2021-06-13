@@ -15,9 +15,7 @@ import org.alp.App;
 import org.alp.models.Paper;
 import org.alp.models.PaperTableElement;
 import org.alp.services.CrossRefService;
-import org.alp.services.drawer.GraphDrawer;
 import org.alp.services.PaperService;
-import org.alp.services.graphstream.GraphStreamService;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -22,28 +22,25 @@ import java.util.stream.Collectors;
 
 
 public class GraphDrawer {
-
-
 	private final Pane graphPane;
 	private final PaperCoordinateGiver coordinateGiver = PaperCoordinateGiver.initialize();
+
+	private final Map<String, ArrayList<PaperRectangle>> nodesFromEdgeId = new HashMap<>();
+	private final Map<String, Line> lineFromEdgeIdMap = new HashMap<>();
+	private final ArrayList<PaperRectangle> papers = new ArrayList<>();
+
+	private PaperRectangle root;
+
 	public static double height = 100.0;
 	public static double width = 300.0;
 
 	private double dragStartX = 0.0;
 	private double dragStartY = 0.0;
-	private double minDistanceForDrag = 2.0;
+	private final double minDistanceForDrag = 2.0;
 	private boolean cursorNormal = true;
-	private boolean shouldDrag = true;
-
-	private ArrayList<PaperRectangle> papers = new ArrayList<>();
-	private PaperRectangle root;
-
-	private Map<String, ArrayList<PaperRectangle>> nodesFromEdgeId = new HashMap<>();
-	private Map<String, Line> lineFromEdgeIdMap = new HashMap<>();
-
 
 	private ContextMenu contextMenu;
-	private Scene scene;
+	private final Scene scene;
 
 	private final ArrayList<Color> colorScheme = new ArrayList<>();
 
@@ -82,18 +79,6 @@ public class GraphDrawer {
 		this.contextMenu = contextMenu;
 	}
 
-	private void setupCamera(double startX, double startY) {
-		Camera camera = new PerspectiveCamera(true);
-		camera.translateXProperty().setValue(0);
-		camera.translateYProperty().setValue(0);
-		camera.translateZProperty().setValue(-50);
-		camera.setNearClip(0);
-		camera.setNearClip(10000);
-
-		this.scene.setCamera(camera);
-
-	}
-
 	public void drawGraph(Paper root) {
 		this.reset();
 		coordinateGiver.determineCoordinates(root);
@@ -117,8 +102,6 @@ public class GraphDrawer {
 
 		if(papers.isEmpty()) root = paper;
 		papers.add(paper);
-
-//		PaperRectangle.setColor((paper, Color.LIGHTGRAY));
 
 		drawNodes.put(coordinates, paper);
 
@@ -145,7 +128,7 @@ public class GraphDrawer {
 		}
 
 		if(this.drawNodes != null) drawNodes.clear();
-		if(this.papers != null) this.papers.clear();
+		this.papers.clear();
 		this.root = null;
 	}
 
@@ -163,7 +146,6 @@ public class GraphDrawer {
 				break;
 			}
 		}
-		if(!shouldDrag) return;
 		dragStartX = mouseEvent.getX();
 		dragStartY = mouseEvent.getY();
 	}
@@ -174,7 +156,7 @@ public class GraphDrawer {
 	}
 
 	public void onMouseDrag(MouseEvent mouseEvent) {
-		if(!mouseEvent.isPrimaryButtonDown() || !shouldDrag) return;
+		if(!mouseEvent.isPrimaryButtonDown()) return;
 		if(cursorNormal) App.getScene().setCursor(Cursor.CLOSED_HAND);
 
 		doDrag(mouseEvent);
