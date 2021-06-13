@@ -2,17 +2,24 @@ package org.alp.components.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
+import org.alp.App;
 import org.alp.models.Paper;
 import org.alp.models.PaperTableElement;
 import org.alp.services.CrossRefService;
-import org.alp.services.graphstream.GraphStreamService;
+import org.alp.services.drawer.GraphDrawer;
 import org.alp.services.PaperService;
+import org.alp.services.graphstream.GraphStreamService;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -90,7 +97,6 @@ public class SearchResultsController {
 			System.out.println("No Paper selected");
 			return;
 		}
-		var graph = new GraphStreamService();
 		Paper selected = null;
 		for(Paper paper : papers) {
 			if(this.selectedPaper.getDoi() == null) {
@@ -104,8 +110,24 @@ public class SearchResultsController {
 		}
 		assert selected != null;
 
-		Paper root = CrossRefService.getFullReferences(selected, null);
+		GraphPageController.paper = CrossRefService.getFullReferences(selected, null);
+		openGraphWindow();
+	}
 
-		graph.showGraph(root);
+	private void openGraphWindow() {
+		Parent root;
+		try {
+			root = FXMLLoader.load(App.class.getResource("fxml/graphpage.fxml"));
+			Scene scene = new Scene(root, 800, 600);
+			GraphPageController.scene = scene;
+			GraphPageController.draw(GraphPageController.graphPaneStatic);
+			Stage stage = new Stage();
+
+			stage.setTitle("Citation Graph");
+			stage.setScene(scene);
+			stage.show();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

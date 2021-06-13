@@ -3,6 +3,7 @@ package org.alp.services.graphstream;
 import org.alp.models.Paper;
 import org.alp.services.DateService;
 import org.alp.services.PaperService;
+import org.alp.services.drawer.GraphDrawer;
 
 import java.util.ArrayList;
 
@@ -12,7 +13,7 @@ public class PaperCoordinateGiver {
 	private final float defaultX = 0;
 	private final float defaultY = 0;
 	private final float defaultZ = 0;
-	private final float differenceBetweenNodesY = -1f;
+	private final float differenceBetweenNodesY = (float) -GraphDrawer.height;
 
 
 	private PaperCoordinateGiver() {}
@@ -58,7 +59,13 @@ public class PaperCoordinateGiver {
 	}
 
 	private void normalizeX(Paper root, ArrayList<Paper> papers) {
-		papers.forEach(reference -> reference.setX(reference.getX() - root.getYear()));
+		float normalizationXFactor = (float) GraphDrawer.width / 4f;
+		float normalizationXInitialLength = (float) GraphDrawer.width;
+		final float rootX = root.getX();
+		papers.forEach(paper -> {
+			float ifOnLeft = (float) Float.compare(paper.getX(), rootX);
+			paper.setX(normalizationXFactor*(paper.getX() - root.getYear()) + (ifOnLeft * normalizationXInitialLength));
+		});
 	}
 
 	private void determineY(Paper root) {
