@@ -48,4 +48,8 @@ public class PaperRectangle extends Rectangle {
 		System.out.println("time: " + paperRectangle.getPaper().getYear() + " " + paperRectangle.getPaper().getMonth() + " " + paperRectangle.getPaper().getDay());
 		System.out.println(paperRectangle.getPaper().getTitle());
 	}
+
+	public static void setColor(PaperRectangle paperRectangle, Color color) {
+		paperRectangle.setFill(color);
+	}
 }

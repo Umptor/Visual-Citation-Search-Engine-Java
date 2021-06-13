@@ -104,7 +104,7 @@ public class GraphDrawer {
 				.collect(Collectors.toList());
 
 		paperRectangles.forEach(this::drawNode);
-//		this.colorNodes(root.getPaper());
+		this.colorNodes(this.root);
 	}
 
 	private void drawNode(PaperRectangle paper) {
@@ -114,7 +114,7 @@ public class GraphDrawer {
 		if(papers.isEmpty()) root = paper;
 		papers.add(paper);
 
-		paper.setFill(Color.LIGHTGRAY);
+//		PaperRectangle.setColor((paper, Color.LIGHTGRAY));
 
 		drawNodes.put(coordinates, paper);
 
@@ -205,48 +205,57 @@ public class GraphDrawer {
 		}
 	}
 
-//	private void colorNodes(Paper root) {
-//		int min = Integer.MAX_VALUE;
-//		int max = Integer.MIN_VALUE;
-//
-//		ArrayList<Paper> papers = new ArrayList<>(root.getReferences());
-//		papers.add(root);
-//
-//		for(Paper paper : papers) {
-//			min = Math.min(min, paper.getReferences().size());
-//			max = Math.max(max, paper.getReferences().size());
-//		}
-//
-//		int[] colorCuttoffs = getColorCutoffs(min, max);
-//
-//
-//		papers.forEach(paper -> {
-//			org.graphstream.ui.graphicGraph.stylesheet.Color color = calculateColor(paper, colorCuttoffs);
-//			org.graphstream.graph.Node node = graph.getNode(paper.getDoi());
-//
-//			node.setAttribute("ui.style", "fill-color: rgb(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ");");
-//		});
-//	}
-//
-//	private int[] getColorCutoffs(int min, int max) {
-//		int[] colorCutoffs = new int[]{min, 0, (min + max)/2, 0, max};
-//		colorCutoffs[1] = (colorCutoffs[0] + colorCutoffs[2])/2;
-//		colorCutoffs[3] = (colorCutoffs[4] + colorCutoffs[2])/2;
-//
-//		return colorCutoffs;
-//	}
-//
-//	private org.graphstream.ui.graphicGraph.stylesheet.Color calculateColor(Paper paper, int[] colorCutoffs) {
-//		int referenceCount = paper.getReferences().size();
-//		Color color = colorScheme.get(colorCutoffs.length - 1);
-//
-//		for(int i = 0; i < colorCutoffs.length; i++) {
-//			if(referenceCount <= colorCutoffs[i]) {
-//				color = colorScheme.get(i);
-//				break;
-//			}
-//		}
-//
-//		return color;
-//	}
+	private void colorNodes(PaperRectangle root) {
+		int min = Integer.MAX_VALUE;
+		int max = Integer.MIN_VALUE;
+
+		ArrayList<PaperRectangle> papers = new ArrayList<>(this.papers);
+		papers.add(root);
+
+		for(PaperRectangle paper : papers) {
+			min = Math.min(min, paper.getPaper().getReferences().size());
+			max = Math.max(max, paper.getPaper().getReferences().size());
+		}
+
+		int[] colorCuttoffs = getColorCutoffs(min, max);
+
+
+		papers.forEach(paper -> {
+			Color color = calculateColor(paper.getPaper(), colorCuttoffs);
+			PaperRectangle paperRectangle = this.getPaperRectangle(paper.getPaper());
+			assert paperRectangle != null;
+			PaperRectangle.setColor(paperRectangle, color);
+		});
+	}
+
+	private int[] getColorCutoffs(int min, int max) {
+		int[] colorCutoffs = new int[]{min, 0, (min + max)/2, 0, max};
+		colorCutoffs[1] = (colorCutoffs[0] + colorCutoffs[2])/2;
+		colorCutoffs[3] = (colorCutoffs[4] + colorCutoffs[2])/2;
+
+		return colorCutoffs;
+	}
+
+	private Color calculateColor(Paper paper, int[] colorCutoffs) {
+		int referenceCount = paper.getReferences().size();
+		Color color = colorScheme.get(colorCutoffs.length - 1);
+
+		for(int i = 0; i < colorCutoffs.length; i++) {
+			if(referenceCount <= colorCutoffs[i]) {
+				color = colorScheme.get(i);
+				break;
+			}
+		}
+
+		return color;
+	}
+
+	private PaperRectangle getPaperRectangle(Paper paper) {
+		for(PaperRectangle paperRectangle : this.papers) {
+			if(paperRectangle.getPaper().getDoi().equals(paper.getDoi())) {
+				return paperRectangle;
+			}
+		}
+		return null;
+	}
 }
