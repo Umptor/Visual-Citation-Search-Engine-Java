@@ -5,6 +5,7 @@ import org.alp.models.crossrefApi.PublishTime;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class Paper implements Comparable<Paper> {
@@ -29,7 +30,7 @@ public class Paper implements Comparable<Paper> {
 	public Paper(String doi, String title, Author[] authors, ArrayList<Paper> references, String paperAbstract,
 	             PublishTime publishedPrint, PublishTime publishedOnline) {
 		this.doi = doi;
-		this.title = title;
+		this.title = this.formatTitle(title);
 		this.authors = authors;
 		this.references = references;
 		this.paperAbstract = paperAbstract;
@@ -218,5 +219,26 @@ public class Paper implements Comparable<Paper> {
 		}
 
 		return false;
+	}
+
+	private String formatTitle(String title) {
+		title = title.toLowerCase();
+		String[] parts = title.split(" ");
+		StringBuilder pascalCaseString = new StringBuilder();
+
+		for(String part : parts) {
+			for(int i = 0; i < part.length(); i++) {
+				if(i == 0) pascalCaseString.append(toUpperCase("" + part.charAt(i)));
+				else pascalCaseString.append(part.charAt(i));
+			}
+			pascalCaseString.append(" ");
+		}
+
+
+		return pascalCaseString.toString();
+	}
+
+	private String toUpperCase(String s) {
+		return s.toUpperCase();
 	}
 }

@@ -37,6 +37,40 @@ public class PaperRectangle extends Rectangle {
 		this.paper = paper;
 	}
 
+	public double getMiddleY() {
+		return this.getPaper().getY() + (this.getHeight() / 2);
+	}
+
+	public double getRightSideX() {
+		return this.getPaper().getX() + this.getWidth();
+	}
+
+	public double getLeftSideX() {
+		return this.getPaper().getX();
+	}
+
+	/**
+	 * @return Returns an array where the first element is x and the second is the y
+	 */
+	public double[] getEdgeLeftCoords() {
+		double[] edgeCoords = new double[2];
+
+		edgeCoords[0] = getLeftSideX();
+		edgeCoords[1] = getMiddleY();
+		return edgeCoords;
+	}
+
+	/**
+	 * @return Returns an array where the first element is x and the second is the y
+	 */
+	public double[] getEdgeRightCoords() {
+		double[] edgeCoords = new double[2];
+
+		edgeCoords[0] = getRightSideX();
+		edgeCoords[1] = getMiddleY();
+		return edgeCoords;
+	}
+
 	public static void onMouseDownOnPaper(MouseEvent mouseEvent) {
 		PaperRectangle paperRectangle = (PaperRectangle) mouseEvent.getSource();
 

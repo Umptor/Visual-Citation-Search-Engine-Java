@@ -9,6 +9,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import org.alp.App;
 import org.alp.models.rectangles.Coordinates;
 import org.alp.models.Paper;
@@ -25,11 +26,11 @@ public class GraphDrawer {
 
 	private final Pane graphPane;
 	private final PaperCoordinateGiver coordinateGiver = PaperCoordinateGiver.initialize();
-	public static double height = 80.0;
-	public static double width = 150.0;
+	public static double height = 100.0;
+	public static double width = 300.0;
 
-	private double startX = 0.0;
-	private double startY = 0.0;
+	private double dragStartX = 0.0;
+	private double dragStartY = 0.0;
 	private double minDistanceForDrag = 2.0;
 	private boolean cursorNormal = true;
 	private boolean shouldDrag = true;
@@ -37,6 +38,8 @@ public class GraphDrawer {
 	private ArrayList<PaperRectangle> papers = new ArrayList<>();
 	private PaperRectangle root;
 
+	private Map<String, ArrayList<PaperRectangle>> nodesFromEdgeId = new HashMap<>();
+	private Map<String, Line> lineFromEdgeIdMap = new HashMap<>();
 
 
 	private ContextMenu contextMenu;
@@ -105,6 +108,7 @@ public class GraphDrawer {
 
 		paperRectangles.forEach(this::drawNode);
 		this.colorNodes(this.root);
+		this.drawEdges(this.root);
 	}
 
 	private void drawNode(PaperRectangle paper) {
@@ -160,8 +164,8 @@ public class GraphDrawer {
 			}
 		}
 		if(!shouldDrag) return;
-		startX = mouseEvent.getX();
-		startY = mouseEvent.getY();
+		dragStartX = mouseEvent.getX();
+		dragStartY = mouseEvent.getY();
 	}
 
 	private void onMouseUp(MouseEvent mouseEvent) {
@@ -180,29 +184,66 @@ public class GraphDrawer {
 		double endX = mouseEvent.getX();
 		double endY = mouseEvent.getY();
 
-		double distanceX = -(endX - startX);
-		double distanceY = +(endY - startY);
+		double distanceX = -(endX - dragStartX);
+		double distanceY = +(endY - dragStartY);
 
+		if(hasMinimumMovementBeenFulfilled(distanceX, distanceY)) {
+			double[] normalizedDistances = normalizeDragDistance(distanceX, distanceY);
+
+			dragStartX = endX;
+			dragStartY = endY;
+			doDragOnRectangles(normalizedDistances[0], normalizedDistances[1]);
+			doDragOnEdges(normalizedDistances[0], normalizedDistances[1]);
+		}
+	}
+
+	private void doDragOnRectangles(double changeX, double changeY) {
+		this.papers.forEach(paper -> {
+			double newX = paper.getX() - changeX;
+			double newY = paper.getY() + changeY;
+			paper.getParent().setTranslateX(newX);
+			paper.getParent().setTranslateY(newY);
+			paper.setX(newX);
+			paper.setY(newY);
+		});
+
+	}
+
+	private void doDragOnEdges(double changeX, double changeY) {
+		this.lineFromEdgeIdMap.values().forEach((Line line) -> {
+			double newStartX = line.getStartX() - changeX;
+			double newEndX = line.getEndX() - changeX;
+			double newStartY = line.getStartY() + changeY;
+			double newEndY = line.getEndY() + changeY;
+
+			line.setStartX(newStartX);
+			line.setEndX(newEndX);
+			line.setStartY(newStartY);
+			line.setEndY(newEndY);
+		});
+	}
+
+	/**
+	 * @param distanceX Actual X distance moved
+	 * @param distanceY Actual Y distance moved
+	 * @return Element 0 is how far to move the object in the X direction, Element 1 is how to far to move the object in the Y direction
+	 */
+	private double[] normalizeDragDistance(double distanceX, double distanceY) {
+		double[] normalizedDistances = new double[2];
 
 		double normalizationFactor = 1.0;
 		double distanceXNormalized = distanceX / normalizationFactor;
 		double distanceYNormalized = distanceY / normalizationFactor;
 
-		if(Math.abs(distanceX) > minDistanceForDrag ||
+		normalizedDistances[0] = distanceXNormalized;
+		normalizedDistances[1] = distanceYNormalized;
+		return normalizedDistances;
+	}
+
+	private boolean hasMinimumMovementBeenFulfilled(double distanceX, double distanceY) {
+		return  Math.abs(distanceX) > minDistanceForDrag ||
 				Math.abs(distanceY) > minDistanceForDrag ||
-				Math.abs(distanceX + distanceY) > minDistanceForDrag) {
-			// Do drag
-			startX = endX;
-			startY = endY;
-			this.papers.forEach(paper -> {
-				double newX = paper.getX() - distanceXNormalized;
-				double newY = paper.getY() + distanceYNormalized;
-				paper.getParent().setTranslateX(newX);
-				paper.getParent().setTranslateY(newY);
-				paper.setX(newX);
-				paper.setY(newY);
-			});
-		}
+				Math.abs(distanceX + distanceY) > minDistanceForDrag;
 	}
 
 	private void colorNodes(PaperRectangle root) {
@@ -218,7 +259,6 @@ public class GraphDrawer {
 		}
 
 		int[] colorCuttoffs = getColorCutoffs(min, max);
-
 
 		papers.forEach(paper -> {
 			Color color = calculateColor(paper.getPaper(), colorCuttoffs);
@@ -257,5 +297,56 @@ public class GraphDrawer {
 			}
 		}
 		return null;
+	}
+
+	private void drawEdges(PaperRectangle root) {
+		ArrayList<PaperRectangle> papers = this.papers.stream()
+				.filter(paper -> !paper.equals(root))
+				.collect(Collectors.toCollection(ArrayList::new));
+
+		papers.forEach(paper -> drawEdge(root, paper));
+	}
+
+	private void drawEdge(PaperRectangle start, PaperRectangle end) {
+		double[] startCoords;
+		double[] endCoords;
+
+		if(start.getPaper().compareTo(end.getPaper()) >= 0) {
+			startCoords = start.getEdgeLeftCoords();
+			endCoords = end.getEdgeRightCoords();
+		} else {
+			startCoords = start.getEdgeRightCoords();
+			endCoords = end.getEdgeLeftCoords();
+		}
+
+		String edgeId = getEdgeId(start, end);
+
+		if(this.hasEdge(edgeId)) {
+			return;
+		}
+
+		ArrayList<PaperRectangle> edgeNodes = new ArrayList<>();
+		edgeNodes.add(start);
+		edgeNodes.add(end);
+
+		this.nodesFromEdgeId.put(edgeId, edgeNodes);
+
+		Line line = new Line();
+		line.setStartX(startCoords[0]);
+		line.setEndX(endCoords[0]);
+		line.setStartY(startCoords[1]);
+		line.setEndY(endCoords[1]);
+
+
+		this.graphPane.getChildren().add(line);
+		this.lineFromEdgeIdMap.put(edgeId, line);
+	}
+
+	private boolean hasEdge(String edgeId) {
+		return this.lineFromEdgeIdMap.containsKey(edgeId);
+	}
+
+	private String getEdgeId(PaperRectangle start, PaperRectangle end) {
+		return start.getPaper().getDoi() + end.getPaper().getDoi();
 	}
 }
