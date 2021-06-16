@@ -85,11 +85,8 @@ public class PaperRectangle extends Rectangle {
 		onMouseDownOnPaper(mouseEvent.getButton());
 	}
 
-	protected void onMouseDownOnPaper(MouseButton mouseButton) {
+	public void onMouseDownOnPaper(MouseButton mouseButton) {
 		this.printInformationToConsole();
-		if(mouseButton == MouseButton.PRIMARY) {
-			this.changeRootNode();
-		}
 	}
 
 	private void printInformationToConsole() {
@@ -100,10 +97,10 @@ public class PaperRectangle extends Rectangle {
 		System.out.println("");
 	}
 
-	private void changeRootNode() {
+	public void setRootNode() {
 		Paper root = graphDrawer.getRoot().getPaper();
 		this.paper = CrossRefService.getFullReferences(this.paper, root);
-		graphDrawer.drawGraph(this.getPaper());
+		graphDrawer.drawGraph(this.paper);
 	}
 
 	public void setColor(Color color) {

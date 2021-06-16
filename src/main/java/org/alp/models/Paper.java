@@ -5,7 +5,6 @@ import org.alp.models.crossrefApi.PublishTime;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class Paper implements Comparable<Paper> {
@@ -200,7 +199,7 @@ public class Paper implements Comparable<Paper> {
 
 	@Override
 	public int compareTo(Paper paper) {
-		if(paper == null) return -1;
+//		if(paper == null) return -1;
 		if(!paper.getYear().equals(this.getYear())) return Integer.compare(this.getYear(), paper.getYear());
 		if(!this.getMonth().equals(paper.getMonth())) return Integer.compare(this.getMonth(), paper.getMonth());
 		return Integer.compare(this.getDay(), paper.getDay());

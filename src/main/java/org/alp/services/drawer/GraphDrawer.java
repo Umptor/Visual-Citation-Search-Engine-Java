@@ -1,6 +1,7 @@
 package org.alp.services.drawer;
 
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.scene.*;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -12,6 +13,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import org.alp.App;
+import org.alp.components.controllers.GraphContextMenuController;
 import org.alp.models.rectangles.Coordinates;
 import org.alp.models.Paper;
 import org.alp.models.rectangles.PaperRectangle;
@@ -42,6 +44,7 @@ public class GraphDrawer {
 	private boolean cursorNormal = true;
 
 	private ContextMenu contextMenu;
+	private GraphContextMenuController contextMenuController;
 	private final Scene scene;
 
 	private final ArrayList<Color> colorScheme = new ArrayList<>();
@@ -72,14 +75,17 @@ public class GraphDrawer {
 	}
 
 	private void setupContextMenu() {
-		ContextMenu contextMenu = new ContextMenu();
-		MenuItem menuItem1 = new MenuItem("Choice 1");
-		MenuItem menuItem2 = new MenuItem("Choice 2");
-		MenuItem menuItem3 = new MenuItem("Choice 3");
+		MenuItem focus = new MenuItem("Focus Paper");
+		MenuItem remember = new MenuItem("Remember Paper");
+		MenuItem menuItem3 = new MenuItem("What am I doing here");
 
-		menuItem3.setOnAction((event) -> System.out.println("Choice 3 clicked!"));
-		contextMenu.getItems().addAll(menuItem1,menuItem2,menuItem3);
-		this.contextMenu = contextMenu;
+		this.contextMenuController = new GraphContextMenuController(graphPane);
+
+		this.contextMenuController.setFocusMenuItem(focus);
+		this.contextMenuController.setRememberMenuItem(remember);
+
+		contextMenuController.setMenuItem(menuItem3, (event) -> System.out.println("Choice 3 clicked!"));
+		this.contextMenu = contextMenuController.getContextMenu();
 	}
 
 	public void drawGraph(Paper root) {
@@ -138,16 +144,19 @@ public class GraphDrawer {
 	}
 
 
-	//region Mouse Click Events
+	//region: Graphpane Mouse Click Events
 	public void onMouseDown(MouseEvent mouseEvent) {
+
 		switch(mouseEvent.getButton()) {
 			case PRIMARY: {
-				this.contextMenu.hide();
+				this.contextMenuController.hide();
 				break;
 			}
 			case SECONDARY: {
-				this.graphPane.setOnContextMenuRequested(event ->
-						this.contextMenu.show(this.graphPane, event.getScreenX(), event.getScreenY()));
+				var clickedObject = mouseEvent.getPickResult().getIntersectedNode();
+				if(clickedObject instanceof PaperRectangle) {
+					contextMenuController.show((PaperRectangle) clickedObject, mouseEvent.getX(), mouseEvent.getY());
+				}
 				break;
 			}
 		}
@@ -159,6 +168,11 @@ public class GraphDrawer {
 		App.getScene().setCursor(Cursor.DEFAULT);
 		cursorNormal = true;
 	}
+	//endregion
+
+	//region: contextMenu events
+
+
 	//endregion
 
 	//region Mouse Scroll Events
