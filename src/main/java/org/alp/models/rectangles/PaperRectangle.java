@@ -1,5 +1,6 @@
 package org.alp.models.rectangles;
 
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -81,19 +82,22 @@ public class PaperRectangle extends Rectangle {
 	public void onMouseDownOnPaper(MouseEvent mouseEvent) {
 		PaperRectangle paperRectangle = (PaperRectangle) mouseEvent.getSource();
 
-		onMouseDownOnPaper();
+		onMouseDownOnPaper(mouseEvent.getButton());
 	}
 
-	protected void onMouseDownOnPaper() {
+	protected void onMouseDownOnPaper(MouseButton mouseButton) {
 		this.printInformationToConsole();
-		this.changeRootNode();
+		if(mouseButton == MouseButton.PRIMARY) {
+			this.changeRootNode();
+		}
 	}
 
 	private void printInformationToConsole() {
+		System.out.println("DOI: " + this.getPaper().getDoi());
 		System.out.println("Paper: " + this.getPaper().getTitle());
 		System.out.println("x: " + this.getX() + " y: " + this.getY());
 		System.out.println("time: " + this.getPaper().getYear() + " " + this.getPaper().getMonth() + " " + this.getPaper().getDay());
-		System.out.println(this.getPaper().getTitle());
+		System.out.println("");
 	}
 
 	private void changeRootNode() {

@@ -1,5 +1,6 @@
 package org.alp.models.rectangles;
 
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 
@@ -26,6 +27,6 @@ public class PaperText extends Text {
 
 	public void onMouseDownOnText(MouseEvent mouseEvent) {
 		PaperText paperText = (PaperText) mouseEvent.getSource();
-		paperText.getPaperRectangle().onMouseDownOnPaper();
+		paperText.getPaperRectangle().onMouseDownOnPaper(mouseEvent.getButton());
 	}
 }
