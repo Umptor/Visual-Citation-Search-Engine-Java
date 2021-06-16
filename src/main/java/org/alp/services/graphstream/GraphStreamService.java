@@ -122,8 +122,6 @@ public class GraphStreamService {
 	}
 
 	public void printXAndY(String doi) {
-		Node node = graph.getNode(doi);
-
 		Paper selectedPaper = CrossRefService.findPaper(rootPaper, doi);
 		System.out.println("X from GraphStream = " + selectedPaper.getX());
 		System.out.println("Y from GraphStream = " + selectedPaper.getY());

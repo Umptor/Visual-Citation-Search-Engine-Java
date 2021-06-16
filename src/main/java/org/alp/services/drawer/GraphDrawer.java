@@ -155,7 +155,7 @@ public class GraphDrawer {
 			case SECONDARY: {
 				var clickedObject = mouseEvent.getPickResult().getIntersectedNode();
 				if(clickedObject instanceof PaperRectangle) {
-					contextMenuController.show((PaperRectangle) clickedObject, mouseEvent.getX(), mouseEvent.getY());
+					contextMenuController.show((PaperRectangle) clickedObject);
 				}
 				break;
 			}

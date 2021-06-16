@@ -3,9 +3,6 @@ package org.alp.components.controllers;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import org.alp.models.rectangles.PaperRectangle;
 
@@ -53,7 +50,7 @@ public class GraphContextMenuController {
 		this.contextMenu.hide();
 	}
 
-	public void show(PaperRectangle paperRectangle, double x, double y) {
+	public void show(PaperRectangle paperRectangle) {
 		if(paperRectangle == null) {
 			return;
 		}

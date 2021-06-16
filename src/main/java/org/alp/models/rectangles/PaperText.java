@@ -28,6 +28,6 @@ public class PaperText extends Text {
 
 	public void onMouseDownOnText(MouseEvent mouseEvent) {
 		PaperText paperText = (PaperText) mouseEvent.getSource();
-		paperText.getPaperRectangle().onMouseDownOnPaper(mouseEvent.getButton());
+		paperText.getPaperRectangle().onMouseDownOnPaper();
 	}
 }

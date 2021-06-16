@@ -79,12 +79,6 @@ public class PaperTreeViewerListener implements ViewerListener {
 		Paper paper = graphStreamService.getPaper(id);
 		ContextMenuService contextMenuService = new ContextMenuService(paper, graphStreamService);
 		contextMenuService.getContextMenu().show((Node) view, rightClickX, rightClickY);
-		return;
-//		if(canRightClick) {
-//
-//		} else {
-//			getNewRootNode(id);
-//		}
 	}
 
 	@Override
