@@ -15,7 +15,7 @@ import org.alp.App;
 import org.alp.models.Paper;
 import org.alp.models.PaperTableElement;
 import org.alp.services.PaperService;
-import org.alp.services.PaperService;
+import org.alp.services.SavePaperService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,9 +27,14 @@ public class SearchResultsController {
 	public Button showButton;
 	@FXML
 	public TableView<PaperTableElement> resultsTable;
+	@FXML
+	public TableView<PaperTableElement> savedPapersTable;
 
 	PaperTableElement selectedPaper;
 	ArrayList<Paper> papers;
+
+	ArrayList<Paper> savedPapers = new ArrayList<>();
+	private boolean selectedSavedNode = false;
 
 	public SearchResultsController() {
 		System.out.println("controller for searchResults");
@@ -54,6 +59,7 @@ public class SearchResultsController {
 			resultsTable.getItems().add(a);
 		});
 
+		SavePaperService.setSearchResultsController(this);
 		System.out.println("Initialized Search Results Page");
 	}
 
@@ -61,16 +67,7 @@ public class SearchResultsController {
 		this.setTableColumns();
 
 		this.resultsTable.setItems(FXCollections.observableArrayList());
-		resultsTable.setRowFactory(tv -> {
-			TableRow<PaperTableElement> row = new TableRow<>();
-			row.setOnMouseClicked(event -> {
-				if (!row.isEmpty()) {
-
-					this.selectedPaper = row.getItem();
-				}
-			});
-			return row;
-		});
+		this.setTableRowOnClick(resultsTable, false);
 	}
 
 	private void setTableColumns() {
@@ -96,11 +93,12 @@ public class SearchResultsController {
 			return;
 		}
 		Paper selected = null;
-		for(Paper paper : papers) {
-			if(this.selectedPaper.getDoi() == null) {
-				System.out.println("Paper doesn't have DOI, what");
-				return;
-			}
+		if(this.selectedPaper.getDoi() == null) {
+			System.out.println("Paper doesn't have DOI, what");
+			return;
+		}
+		ArrayList<Paper> papersLoop = selectedSavedNode ? savedPapers : papers;
+		for(Paper paper : papersLoop) {
 			if(paper.getDoi().equals(selectedPaper.getDoi())) {
 				selected = paper;
 				break;
@@ -119,6 +117,7 @@ public class SearchResultsController {
 			Scene scene = new Scene(root, 800, 600);
 			GraphPageController.scene = scene;
 			GraphPageController.draw(GraphPageController.graphPaneStatic);
+			GraphPageController.searchResultsController = this;
 			Stage stage = new Stage();
 
 			stage.setTitle("Citation Graph");
@@ -127,5 +126,53 @@ public class SearchResultsController {
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Dont call this method, use the method inside SavePaperService instead
+	 */
+	public boolean savePaper(Paper paper) {
+		if(this.savedPapersTable.getItems().isEmpty()) {
+			this.initialSavedPapersTable();
+		}
+		PaperTableElement tableElement = new PaperTableElement(
+				paper.getTitle(),
+				paper.getAuthors().length > 0 ? paper.getAuthors()[0].getFullname() : "",
+				paper.getDoi(),
+				paper.getReferences().size());
+		if(this.savedPapersTable.getItems().contains(tableElement)) {
+			return false;
+		}
+
+		this.savedPapersTable.getItems().add(tableElement);
+		this.savedPapers.add(paper);
+		return true;
+	}
+
+	private void initialSavedPapersTable() {
+		this.savedPapersTable.setVisible(true);
+		this.setSavedPapersTableColumns();
+		this.setTableRowOnClick(savedPapersTable, true);
+	}
+
+	private void setSavedPapersTableColumns() {
+		TableColumn<PaperTableElement, String> titleColumn = new TableColumn<>("Title");
+		titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+		titleColumn.setResizable(true);
+
+		this.savedPapersTable.getColumns().add(titleColumn);
+	}
+
+	private void setTableRowOnClick(TableView<PaperTableElement> table, boolean savedNode) {
+		table.setRowFactory(tv -> {
+			TableRow<PaperTableElement> row = new TableRow<>();
+			row.setOnMouseClicked(event -> {
+				if (!row.isEmpty()) {
+					this.selectedPaper = row.getItem();
+					this.selectedSavedNode = savedNode;
+				}
+			});
+			return row;
+		});
 	}
 }

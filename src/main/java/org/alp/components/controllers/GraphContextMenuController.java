@@ -5,6 +5,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.Pane;
 import org.alp.models.rectangles.PaperRectangle;
+import org.alp.services.SavePaperService;
 
 import java.util.function.Consumer;
 
@@ -34,7 +35,7 @@ public class GraphContextMenuController {
 	}
 
 	private void rememberAction() {
-		System.out.println("Not Implemented Yet!");
+		SavePaperService.save(this.paperRectangle.getPaper());
 	}
 
 	public void setMenuItem(MenuItem menuItem, Consumer<ActionEvent> onClick) {
