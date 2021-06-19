@@ -1,9 +1,7 @@
 package org.alp.models.rectangles;
 
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
-import org.alp.components.controllers.GraphContextMenuController;
 
 public class PaperText extends Text {
 	PaperRectangle paperRectangle;

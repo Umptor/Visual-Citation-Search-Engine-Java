@@ -1,7 +1,6 @@
 package org.alp.services.drawer;
 
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.scene.*;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -12,6 +11,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import org.alp.App;
 import org.alp.components.controllers.GraphContextMenuController;
 import org.alp.models.rectangles.Coordinates;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 public class GraphDrawer {
 	private final Pane graphPane;
+	private final Pane overlayPane;
 	private final PaperCoordinateGiver coordinateGiver = PaperCoordinateGiver.initialize();
 
 	private final Map<String, ArrayList<PaperRectangle>> nodesFromEdgeIdMap = new HashMap<>();
@@ -36,6 +38,8 @@ public class GraphDrawer {
 
 	public static double height = 100.0;
 	public static double width = 300.0;
+	private double defaultZ = 0.0;
+	private double overlayZ = 5.0;
 
 	private final double minDistanceForDrag = 2.0;
 	private final double deltaZoom = 0.95d;
@@ -47,7 +51,13 @@ public class GraphDrawer {
 	private GraphContextMenuController contextMenuController;
 	private final Scene scene;
 
+	double colorBoxHeight = 30, colorBoxWidth = 30;
+	double legendXOffset = 10, legendYOffset = 10;
+
+
+
 	private final ArrayList<Color> colorScheme = new ArrayList<>();
+	private int[] colorCuttoffs = null;
 
 	{
 		colorScheme.add(Color.rgb(224, 242, 216));
@@ -59,8 +69,9 @@ public class GraphDrawer {
 
 	Map<Coordinates, PaperRectangle> drawNodes = new HashMap<>();
 
-	public GraphDrawer(Pane graphPane, Scene scene) {
+	public GraphDrawer(Pane graphPane, Pane overlayPane, Scene scene) {
 		this.graphPane = graphPane;
+		this.overlayPane= overlayPane;
 		this.scene = scene;
 
 		this.setupEventHandlers();
@@ -103,6 +114,7 @@ public class GraphDrawer {
 		paperRectangles.forEach(this::drawNode);
 		this.colorNodes(this.root);
 		this.drawEdges(this.root);
+		this.drawOverlay();
 	}
 
 	private void drawNode(PaperRectangle paper) {
@@ -121,11 +133,13 @@ public class GraphDrawer {
 
 		stack.setTranslateX(paper.getX());
 		stack.setTranslateY(paper.getY());
+		stack.setTranslateZ(this.defaultZ);
+		text.setPickOnBounds(false);
 
 		graphPane.getChildren().add(stack);
 
-		paper.addEventHandler(MouseEvent.MOUSE_PRESSED, paper::onMouseDownOnPaper);
-		text.addEventHandler(MouseEvent.MOUSE_PRESSED, text::onMouseDownOnText);
+		paper.addEventHandler(MouseEvent.MOUSE_RELEASED, paper::onMouseDownOnPaper);
+		text.addEventHandler(MouseEvent.MOUSE_RELEASED, text::onMouseDownOnText);
 	}
 
 	private void reset() {
@@ -170,10 +184,6 @@ public class GraphDrawer {
 	}
 	//endregion
 
-	//region: contextMenu events
-
-
-	//endregion
 
 	//region Mouse Scroll Events
 	private void onMouseScroll(ScrollEvent scrollEvent) {
@@ -271,6 +281,8 @@ public class GraphDrawer {
 	}
 	//endregion
 
+
+	//region Coloring Nodes
 	private void colorNodes(PaperRectangle root) {
 		int min = Integer.MAX_VALUE;
 		int max = Integer.MIN_VALUE;
@@ -293,12 +305,17 @@ public class GraphDrawer {
 		});
 	}
 
-	private int[] getColorCutoffs(int min, int max) {
-		int[] colorCutoffs = new int[]{min, 0, (min + max)/2, 0, max};
-		colorCutoffs[1] = (colorCutoffs[0] + colorCutoffs[2])/2;
-		colorCutoffs[3] = (colorCutoffs[4] + colorCutoffs[2])/2;
+	public int[] getColorCutoffs() {
+		return this.colorCuttoffs;
+	}
 
-		return colorCutoffs;
+	private int[] getColorCutoffs(int min, int max) {
+		int[] cutoffs = new int[]{min, 0, (min + max)/2, 0, max};
+		cutoffs[1] = (cutoffs[0] + cutoffs[2])/2;
+		cutoffs[3] = (cutoffs[4] + cutoffs[2])/2;
+
+		this.colorCuttoffs = cutoffs;
+		return cutoffs;
 	}
 
 	private Color calculateColor(Paper paper, int[] colorCutoffs) {
@@ -314,6 +331,8 @@ public class GraphDrawer {
 
 		return color;
 	}
+	//endregion Coloring Nodes
+
 
 	//region Edge Methods
 	private void drawEdges(PaperRectangle root) {
@@ -366,7 +385,51 @@ public class GraphDrawer {
 	private String getEdgeId(PaperRectangle start, PaperRectangle end) {
 		return start.getPaper().getDoi() + end.getPaper().getDoi();
 	}
+
+
 	//endregion
+
+
+	//region overlay
+	private void drawOverlay() {
+		this.setupOverlay();
+		this.drawDateLines();
+		this.drawLegend();
+	}
+
+	private void setupOverlay() {
+		this.overlayPane.setPrefWidth(this.colorScheme.size() * this.colorBoxWidth);
+		this.overlayPane.setPrefHeight(this.colorBoxHeight);
+	}
+
+	private void drawDateLines() {
+
+	}
+
+	private void drawLegend() {
+		this.drawColorLegend();
+	}
+
+	private void drawColorLegend() {
+
+		for(int i = 0; i < this.colorScheme.size(); i++) {
+			StackPane stackPane = new StackPane();
+			String citationCount = "<" + (colorCuttoffs[i] + 1);
+			Text text = new Text(citationCount);
+
+			Rectangle colorBox = new Rectangle(legendXOffset + (this.colorBoxWidth * i), legendYOffset, this.colorBoxWidth, this.colorBoxHeight);
+			colorBox.setFill(this.colorScheme.get(i));
+
+			stackPane.setPrefWidth(this.colorBoxWidth);
+			stackPane.setPrefHeight(this.colorBoxHeight);
+			stackPane.setTranslateX(colorBox.getX());
+			stackPane.setTranslateY(colorBox.getY());
+			stackPane.getChildren().addAll(colorBox, text);
+
+			overlayPane.getChildren().add(stackPane);
+		}
+	}
+	//endregion overlay
 
 	private PaperRectangle getPaperRectangle(Paper paper) {
 		for(PaperRectangle paperRectangle : this.papers) {
@@ -376,6 +439,7 @@ public class GraphDrawer {
 		}
 		return null;
 	}
+
 
 	public PaperRectangle getRoot() {
 		return root;

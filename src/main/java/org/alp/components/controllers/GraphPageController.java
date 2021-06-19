@@ -12,20 +12,24 @@ public class GraphPageController {
 	public static Paper paper;
 	public static Scene scene;
 	public static Pane graphPaneStatic;
+	public static Pane overlayPaneStatic;
 
 	public static SearchResultsController searchResultsController;
 
 	@FXML
 	public Pane graphPane;
+	@FXML
+	public Pane overlayPane;
 
 	@FXML
 	public void initialize() {
 		System.out.println("New Page Created");
 		graphPaneStatic = this.graphPane;
+		overlayPaneStatic = this.overlayPane;
 	}
 
-	public static void draw(Pane graphPane) {
-		GraphDrawer graphDrawer = new GraphDrawer(graphPane, scene);
+	public static void draw(Pane graphPane, Pane overlayPane) {
+		GraphDrawer graphDrawer = new GraphDrawer(graphPane, overlayPane, scene);
 		graphDrawer.drawGraph(paper);
 	}
 }

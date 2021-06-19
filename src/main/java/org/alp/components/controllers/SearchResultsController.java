@@ -116,7 +116,7 @@ public class SearchResultsController {
 			root = FXMLLoader.load(App.class.getResource("fxml/graphpage.fxml"));
 			Scene scene = new Scene(root, 800, 600);
 			GraphPageController.scene = scene;
-			GraphPageController.draw(GraphPageController.graphPaneStatic);
+			GraphPageController.draw(GraphPageController.graphPaneStatic, GraphPageController.overlayPaneStatic);
 			GraphPageController.searchResultsController = this;
 			Stage stage = new Stage();
 
