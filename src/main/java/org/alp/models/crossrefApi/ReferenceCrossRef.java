@@ -2,18 +2,18 @@ package org.alp.models.crossrefApi;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Reference {
+public class ReferenceCrossRef {
 	private String key;
 
 	@SerializedName("DOI")
 	private String doi;
 
-	public Reference(String key, String doi) {
+	public ReferenceCrossRef(String key, String doi) {
 		this.key = key;
 		this.doi = doi;
 	}
 
-	public Reference(String doi) {
+	public ReferenceCrossRef(String doi) {
 		this.doi = doi;
 	}
 

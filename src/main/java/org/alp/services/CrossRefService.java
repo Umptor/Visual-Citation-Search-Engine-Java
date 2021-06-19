@@ -1,12 +1,10 @@
 package org.alp.services;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import org.alp.models.Paper;
-import org.alp.models.crossrefApi.getMetaDataResponse.GetMetadataResponse;
-import org.alp.models.crossrefApi.getWorksResponse.GetWorksResponse;
-import org.alp.models.crossrefApi.Item;
-import org.alp.models.crossrefApi.Reference;
+import org.alp.models.crossrefApi.getMetaDataResponse.GetMetadataResponseCrossRef;
+import org.alp.models.crossrefApi.getWorksResponse.GetWorksResponseCrossRef;
+import org.alp.models.crossrefApi.ItemCrossRef;
+import org.alp.models.crossrefApi.ReferenceCrossRef;
 
 import java.io.IOException;
 import java.net.URI;
@@ -37,7 +35,7 @@ public class CrossRefService {
 		var httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
 
 		String response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
-		var items = jsonMapperToBody(response, GetWorksResponse.class)
+		var items = JsonMapperService.mapJson(response, GetWorksResponseCrossRef.class)
 				.getMessage()
 				.getItems();
 
@@ -70,7 +68,7 @@ public class CrossRefService {
 	}
 	// end Api
 
-	public static Paper getFullReferences(Paper root, Paper oldRoot) {
+	static Paper getFullReferences(Paper root, Paper oldRoot) {
 		if(foundFullPapers.get(root.getDoi()) != null) return foundFullPapers.get(root.getDoi());
 		ArrayList<CompletableFuture<HttpResponse<String>>> requests = new ArrayList<>();
 		ArrayList<Paper> references = new ArrayList<>();
@@ -81,11 +79,17 @@ public class CrossRefService {
 		Paper newRoot = null;
 		try {
 			assert newRootResponse != null;
-			newRoot = mapItemToPaper(jsonMapperToBody(newRootResponse.get().body(), GetMetadataResponse.class).getMessage());
-		} catch(InterruptedException | ExecutionException | NullPointerException e) { e.printStackTrace(); }
-
-		if(newRoot == null) {
-			System.out.println("wtf man");
+			String notFoundString = "[]";
+			String responseString = newRootResponse.get().body();
+			if(responseString.equals(notFoundString)) {
+				return null;
+			}
+			newRoot = mapItemToPaper(JsonMapperService.mapJson(newRootResponse.get().body(), GetMetadataResponseCrossRef.class).getMessage());
+		} catch(Exception e) {
+			System.out.println("Couldn't find root Node in OC");
+			if(!(e instanceof NullPointerException)) {
+				e.printStackTrace();
+			}
 			return null;
 		}
 
@@ -106,12 +110,22 @@ public class CrossRefService {
 		});
 
 		requests.forEach(response -> {
-			try { references.add(mapItemToPaper(jsonMapperToBody(response.get().body(), GetMetadataResponse.class).getMessage())); }
-			catch(InterruptedException | ExecutionException e) { e.printStackTrace(); }
+			try {
+				String notFoundString = "Resource not found.";
+				String responseString = response.get().body();
+				if(responseString.equals(notFoundString)) {
+					return;
+				}
+				references.add(mapItemToPaper(JsonMapperService.mapJson(response.get().body(), GetMetadataResponseCrossRef.class).getMessage()));
+			}
+			catch(Exception e) {
+				System.out.println("Couldn't get paper from OC");
+				e.printStackTrace();
+			}
 		});
 
-		addFullReferences(newRoot, references, alreadyExistingPapers);
-		addFullPapersToFoundList(newRoot);
+		PaperService.addFullReferences(newRoot, references, alreadyExistingPapers);
+		PaperService.addFullPapersToFoundList(newRoot);
 
 		newRoot.fixReferences(true);
 		if(oldRoot != null && !newRoot.getReferences().contains(oldRoot)) {
@@ -121,44 +135,13 @@ public class CrossRefService {
 		return newRoot;
 	}
 
-	private static void addFullPapersToFoundList(Paper root) {
-		foundFullPapers.putIfAbsent(root.getDoi(), root);
-
-//		root.getReferences().forEach(paper -> foundFullPapers.put(paper.getDoi(), paper));
-	}
-
-	private static void addFullReferences(Paper root, List<Paper> references, List<Paper> alreadyFoundPapers) {
-		references.forEach(paper -> {
-			if(paper.getDoi() == null || paper.getTitle() == null) return;
-			boolean isFullPaper = false;
-			if(root.getReferences().contains(paper)) {
-				int index = root.getReferences().indexOf(paper);
-				Paper reference = root.getReferences().get(index);
-				if(reference.getDoi() != null && reference.getTitle() != null) isFullPaper = true;
-
-				if(!isFullPaper) {
-					root.getReferences().set(index, paper);
-				}
-			} else {
-				root.getReferences().add(paper);
-			}
-		});
-
-		root.getReferences().addAll(alreadyFoundPapers);
-	}
-
-	public static Paper findPaper(Paper rootPaper, String doiToFind) {
-		if(rootPaper.getDoi().equals(doiToFind)) return rootPaper;
-		else return rootPaper.getReferences().get(rootPaper.getReferences().indexOf(new Paper(doiToFind)));
-	}
-
-	private static Paper mapItemToPaper(Item item) {
+	private static Paper mapItemToPaper(ItemCrossRef item) {
 		List<Paper> references;
 		if(item.getReferences() == null) {
 			references = null;
 		} else {
 			references = Arrays.stream(item.getReferences())
-					.map((Reference reference) -> {
+					.map((ReferenceCrossRef reference) -> {
 						Paper paper = new Paper();
 						paper.setDoi(reference.getDoi());
 						return (paper.getDoi() == null) ? null : paper;
@@ -174,23 +157,10 @@ public class CrossRefService {
 				item.getPublishedPrint(), item.getPublishedOnline());
 	}
 
-	private static String mapTitle(Item item) {
+	private static String mapTitle(ItemCrossRef item) {
 		if(item.getTitle() != null && item.getTitle().length > 0) return item.getTitle()[0];
 
 		return null;
-	}
-
-	private static <T> T jsonMapperToBody(String str, Class<T> classOfT) {
-		T returnValue = null;
-		try {
-			returnValue = new Gson().fromJson(str, classOfT);
-		} catch(JsonSyntaxException exception) {
-			System.out.println("Exception while parsing json");
-			System.out.println("Json in question");
-			System.out.println(str);
-			System.out.println(exception.toString());
-		}
-		return returnValue;
 	}
 }
 

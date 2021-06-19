@@ -1,7 +1,7 @@
 package org.alp.services.graphstream;
 
 import org.alp.models.Paper;
-import org.alp.services.CrossRefService;
+import org.alp.services.PaperService;
 import org.alp.services.CssReader;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -103,7 +103,7 @@ public class GraphStreamService {
 			System.out.println("This isn't a node you dum dum");
 		}
 
-		Paper selectedPaper = CrossRefService.findPaper(rootPaper, nodeDoi);
+		Paper selectedPaper = PaperService.findPaper(rootPaper, nodeDoi);
 
 		if(selectedPaper.getPaperAbstract() == null || selectedPaper.getPaperAbstract().equals("")) {
 			System.out.println("Paper with DOI: " + selectedPaper.getDoi() + " unfortunately has no abstract in database");
@@ -122,19 +122,19 @@ public class GraphStreamService {
 	}
 
 	public void printXAndY(String doi) {
-		Paper selectedPaper = CrossRefService.findPaper(rootPaper, doi);
+		Paper selectedPaper = PaperService.findPaper(rootPaper, doi);
 		System.out.println("X from GraphStream = " + selectedPaper.getX());
 		System.out.println("Y from GraphStream = " + selectedPaper.getY());
 	}
 
 	public Paper getPaper(String doi) {
-		return CrossRefService.findPaper(rootPaper, doi);
+		return PaperService.findPaper(rootPaper, doi);
 	}
 
 
 	private Point3 getNewRoot(Paper newRoot, Paper oldRoot) {
 		// Get Nodes around initialNode
-		Paper newRootWithReferences = CrossRefService.getFullReferences(newRoot, oldRoot);
+		Paper newRootWithReferences = PaperService.getFullReferences(newRoot, oldRoot);
 
 		assert newRootWithReferences != null;
 

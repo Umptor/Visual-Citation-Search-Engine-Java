@@ -1,10 +1,10 @@
 package org.alp.models.crossrefApi;
 
-public class DefaultCrossRefResponse<T> {
+public class DefaultCrossRefResponseCrossRef<T> {
 	private String status;
 	private T message;
 
-	public DefaultCrossRefResponse(String status, T message) {
+	public DefaultCrossRefResponseCrossRef(String status, T message) {
 		this.status = status;
 		this.message = message;
 	}

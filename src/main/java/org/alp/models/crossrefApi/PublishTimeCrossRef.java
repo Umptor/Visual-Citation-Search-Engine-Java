@@ -2,7 +2,7 @@ package org.alp.models.crossrefApi;
 
 import com.google.gson.annotations.SerializedName;
 
-public class PublishTime {
+public class PublishTimeCrossRef {
 
 	public static Integer DEFAULT_MONTH = 6;
 	public static Integer DEFAULT_DAY = 15;
@@ -10,7 +10,7 @@ public class PublishTime {
 	@SerializedName("date-parts")
 	Integer[][] dateParts;
 
-	public PublishTime(Integer[][] dateParts) {
+	public PublishTimeCrossRef(Integer[][] dateParts) {
 		this.dateParts = dateParts;
 		formatDate(this);
 	}
@@ -63,7 +63,7 @@ public class PublishTime {
 		return null;
 	}
 
-	private static void formatDate(PublishTime publishTime) {
+	private static void formatDate(PublishTimeCrossRef publishTime) {
 		Integer year = publishTime.getYear();
 		Integer month = publishTime.getMonth();
 		Integer day = publishTime.getDay();

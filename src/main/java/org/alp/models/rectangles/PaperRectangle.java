@@ -5,7 +5,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import org.alp.models.Paper;
-import org.alp.services.CrossRefService;
+import org.alp.services.PaperService;
 import org.alp.services.drawer.GraphDrawer;
 
 public class PaperRectangle extends Rectangle {
@@ -81,7 +81,7 @@ public class PaperRectangle extends Rectangle {
 
 	public void setRootNode() {
 		Paper root = graphDrawer.getRoot().getPaper();
-		this.paper = CrossRefService.getFullReferences(this.paper, root);
+		this.paper = PaperService.getFullReferences(this.paper, root);
 		graphDrawer.drawGraph(this.paper);
 	}
 

@@ -2,7 +2,7 @@ package org.alp.models.crossrefApi;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Item {
+public class ItemCrossRef {
 
 	@SerializedName("reference-count")
 	private int referenceCount;
@@ -19,21 +19,21 @@ public class Item {
 	private String[] containerTitle;
 
 	@SerializedName("author")
-	private Author[] authors;
+	private AuthorCrossRef[] authors;
 
 	private float score;
 
 	@SerializedName("reference")
-	private Reference[] references;
+	private ReferenceCrossRef[] references;
 
 	@SerializedName("abstract")
 	private String paperAbstract;
 
 	@SerializedName("published-print")
-	private PublishTime publishedPrint;
+	private PublishTimeCrossRef publishedPrint;
 
 	@SerializedName("published-online")
-	private PublishTime publishedOnline;
+	private PublishTimeCrossRef publishedOnline;
 
 	@SerializedName("journal-title")
 	private String journalTitle;
@@ -41,8 +41,8 @@ public class Item {
 	@SerializedName("unstructured")
 	private String unstructured;
 
-	public Item(int referenceCount, String doi, String isReferencedByCount, String[] title, String[] containerTitle,
-	            Author[] authors, float score, Reference[] references, String paperAbstract, PublishTime publishedPrint, PublishTime publishedOnline, String journalTitle, String unstructured) {
+	public ItemCrossRef(int referenceCount, String doi, String isReferencedByCount, String[] title, String[] containerTitle,
+	                    AuthorCrossRef[] authors, float score, ReferenceCrossRef[] references, String paperAbstract, PublishTimeCrossRef publishedPrint, PublishTimeCrossRef publishedOnline, String journalTitle, String unstructured) {
 		this.referenceCount = referenceCount;
 		this.doi = doi;
 		this.isReferencedByCount = isReferencedByCount;
@@ -98,12 +98,12 @@ public class Item {
 		this.containerTitle = containerTitle;
 	}
 
-	public Author[] getAuthors() {
+	public AuthorCrossRef[] getAuthors() {
 		return authors;
 	}
 
-	public void setAuthors(Author[] authors) {
-		this.authors = authors;
+	public void setAuthors(AuthorCrossRef[] authorCrossRefs) {
+		this.authors = authorCrossRefs;
 	}
 
 	public float getScore() {
@@ -114,11 +114,11 @@ public class Item {
 		this.score = score;
 	}
 
-	public Reference[] getReferences() {
+	public ReferenceCrossRef[] getReferences() {
 		return references;
 	}
 
-	public void setReferences(Reference[] references) {
+	public void setReferences(ReferenceCrossRef[] references) {
 		this.references = references;
 	}
 
@@ -130,19 +130,19 @@ public class Item {
 		this.paperAbstract = paperAbstract;
 	}
 
-	public PublishTime getPublishedPrint() {
+	public PublishTimeCrossRef getPublishedPrint() {
 		return publishedPrint;
 	}
 
-	public void setPublishedPrint(PublishTime publishTime) {
-		this.publishedPrint = publishTime;
+	public void setPublishedPrint(PublishTimeCrossRef publishTimeCrossRef) {
+		this.publishedPrint = publishTimeCrossRef;
 	}
 
-	public PublishTime getPublishedOnline() {
+	public PublishTimeCrossRef getPublishedOnline() {
 		return publishedOnline;
 	}
 
-	public void setPublishedOnline(PublishTime publishedOnline) {
+	public void setPublishedOnline(PublishTimeCrossRef publishedOnline) {
 		this.publishedOnline = publishedOnline;
 	}
 

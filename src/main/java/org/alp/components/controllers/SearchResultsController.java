@@ -14,7 +14,7 @@ import javafx.stage.Stage;
 import org.alp.App;
 import org.alp.models.Paper;
 import org.alp.models.PaperTableElement;
-import org.alp.services.CrossRefService;
+import org.alp.services.PaperService;
 import org.alp.services.PaperService;
 
 import java.io.IOException;
@@ -108,7 +108,7 @@ public class SearchResultsController {
 		}
 		assert selected != null;
 
-		GraphPageController.paper = CrossRefService.getFullReferences(selected, null);
+		GraphPageController.paper = PaperService.getFullReferences(selected, null);
 		openGraphWindow();
 	}
 
