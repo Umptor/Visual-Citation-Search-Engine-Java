@@ -1,11 +1,11 @@
 package org.alp.models.crossrefApi;
 
-public class Author {
+public class AuthorCrossRef {
 	private String given;
 	private String family;
 	private String sequence;
 
-	public Author(String given, String family, String sequence) {
+	public AuthorCrossRef(String given, String family, String sequence) {
 		this.given = given;
 		this.family = family;
 		this.sequence = sequence;

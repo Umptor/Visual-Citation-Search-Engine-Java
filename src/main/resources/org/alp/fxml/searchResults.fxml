@@ -3,16 +3,30 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<GridPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1"
-          xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.alp.components.controllers.SearchResultsController">
+<GridPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.alp.components.controllers.SearchResultsController">
     <columnConstraints>
-        <ColumnConstraints percentWidth="80"/>
-        <ColumnConstraints percentWidth="20" halignment="LEFT"/>
+        <ColumnConstraints percentWidth="75" />
+        <ColumnConstraints halignment="LEFT" percentWidth="25"/>
     </columnConstraints>
     <rowConstraints>
-        <RowConstraints percentHeight="100" valignment="TOP"/>
+        <RowConstraints percentHeight="100" valignment="TOP" />
     </rowConstraints>
 
     <TableView fx:id="resultsTable" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-    <Button fx:id="showButton" onMouseClicked="#onShowButtonMouseClick" GridPane.columnIndex="1" GridPane.rowIndex="0" text="Open Graph"/>
+    <GridPane GridPane.columnIndex="1" >
+        <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" percentWidth="100"/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints maxHeight="50.0" minHeight="50.0" prefHeight="50.0" vgrow="SOMETIMES"/>
+            <RowConstraints maxHeight="374.0" minHeight="10.0" prefHeight="311.0" vgrow="SOMETIMES"/>
+        </rowConstraints>
+
+
+        <Button fx:id="showButton" onMouseClicked="#onShowButtonMouseClick" text="Open Graph"
+                GridPane.halignment="CENTER" GridPane.valignment="CENTER"/>
+
+        <TableView fx:id="savedPapersTable" prefHeight="400.0" prefWidth="400.0" GridPane.rowIndex="1" visible="false">
+        </TableView>
+    </GridPane>
 </GridPane>

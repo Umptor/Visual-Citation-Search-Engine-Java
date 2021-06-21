@@ -1,11 +1,14 @@
 package org.alp.services.graphstream;
 
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import org.alp.App;
+import org.alp.models.Paper;
+import org.alp.services.ContextMenuService;
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.geom.Point2;
 import org.graphstream.ui.geom.Point3;
@@ -24,8 +27,11 @@ public class PaperTreeViewerListener implements ViewerListener {
 
 	private double startX = 0.0;
 	private double startY = 0.0;
-	private double minDistanceForDrag = 2.0;
+	private final double minDistanceForDrag = 2.0;
 	private boolean cursorNormal = true;
+	private boolean canRightClick = false;
+	private double rightClickX = 0f;
+	private double rightClickY = 0f;
 
 	public PaperTreeViewerListener(GraphStreamService graphStreamService, Graph graph, Viewer viewer) {
 		this.graphStreamService = graphStreamService;
@@ -64,15 +70,15 @@ public class PaperTreeViewerListener implements ViewerListener {
 	@Override
 	public void buttonPushed(String id) {
 		pushedId = id;
+		graphStreamService.printXAndY(id);
 	}
 
 	@Override
 	public void buttonReleased(String id) {
-		if(pushedId.equals(id)) {
-			graphStreamService.selectNode(id);
-		} else {
-			System.out.println("Make up your mind and select something");
-		}
+
+		Paper paper = graphStreamService.getPaper(id);
+		ContextMenuService contextMenuService = new ContextMenuService(paper, graphStreamService);
+		contextMenuService.getContextMenu().show((Node) view, rightClickX, rightClickY);
 	}
 
 	@Override
@@ -100,13 +106,36 @@ public class PaperTreeViewerListener implements ViewerListener {
 	}
 
 	public void onMouseDown(MouseEvent mouseEvent) {
-		startX = mouseEvent.getX();
-		startY = mouseEvent.getY();
+		switch(mouseEvent.getButton()) {
+			case PRIMARY: {
+				startX = mouseEvent.getX();
+				startY = mouseEvent.getY();
+
+				System.out.println("X from Java = " + mouseEvent.getX());
+				System.out.println("Y from Java = " + mouseEvent.getY());
+				break;
+			}
+			case SECONDARY: {
+				canRightClick = true;
+			}
+		}
 	}
 
 	private void onMouseUp(MouseEvent mouseEvent) {
-		App.getScene().setCursor(Cursor.DEFAULT);
-		cursorNormal = true;
+
+		switch(mouseEvent.getButton()) {
+			case PRIMARY: {
+				App.getScene().setCursor(Cursor.DEFAULT);
+				cursorNormal = true;
+				break;
+			}
+			case SECONDARY: {
+				rightClickX = mouseEvent.getX();
+				rightClickY = mouseEvent.getY();
+				canRightClick = false;
+				break;
+			}
+		}
 	}
 
 	public void onMouseDrag(MouseEvent mouseEvent) {
@@ -139,5 +168,18 @@ public class PaperTreeViewerListener implements ViewerListener {
 					viewCenter.y + distanceYNormalized,
 					viewCenter.z);
 		}
+	}
+
+	private void getNewRootNode(String doi) {
+		Point3 newCenter;
+		if(pushedId.equals(doi)) {
+			newCenter = graphStreamService.selectNode(doi);
+		} else {
+			System.out.println("Make up your mind and select something");
+			return;
+		}
+
+		Camera cam = view.getCamera();
+		cam.setViewCenter(newCenter.x, newCenter.y, newCenter.z);
 	}
 }

@@ -1,3 +1,7 @@
-node.root {
-    fill-color: red;
+/*noinspection ALL*/
+node {
+    shape:circle;
+    size:40px;
+    text-alignment: center;
+    text-size: 12px;
 }
